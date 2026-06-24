@@ -8,6 +8,13 @@ namespace ShopDomain.Models;
 
 public class Item
 {
-    public int Id { get; set; }
-    public string Title { get; set; }
+    private static int _nextId = 1;
+    public int Id { get; }
+    public string Title { get; set; } 
+    public Item(string title)
+    {
+        Id = _nextId++;
+        Title = title;
+
+    }
 }

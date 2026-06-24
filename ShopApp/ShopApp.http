@@ -1,0 +1,40 @@
+@ShopApp_HostAddress = http://localhost:5126
+
+# GET {{ShopApp_HostAddress}}/weatherforecast/
+# Accept: application/json
+
+###
+GET {{ShopApp_HostAddress}}/api/items
+Accept: application/json
+###
+GET {{ShopApp_HostAddress}}/api/items/2
+Accept: application/json
+
+###
+GET {{ShopApp_HostAddress}}/api/items/search?name=milki
+Accept: application/json
+
+###
+POST {{ShopApp_HostAddress}}/api/items
+Content-Type: application/json
+{
+  "Title": "sup"
+}
+###
+PUT {{ShopApp_HostAddress}}/api/items/2
+Content-Type: application/json
+{
+  "title": "uo"
+}
+###
+DELETE {{ShopApp_HostAddress}}/api/items/1
+
+###
+POST https://e437-37-52-79-159.ngrok-free.app/api/product
+Content-Type: application/json
+{
+  "Title": "Fish",
+  "Price": 5350.3
+}
+ ###
+ GET https://e437-37-52-79-159.ngrok-free.app/api/product

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Razor.Hosting;
 using ShopDomain.Models;
 
 namespace ShopApp.Controllers;
@@ -6,26 +7,21 @@ namespace ShopApp.Controllers;
 [Route("api/[controller]")]
 public class ItemsController : ControllerBase
 {
-    private List<Item> _items = new()
+    private static List<Item> _items = new()
     {
-        new Item
-        {
-            Id = 1,
-            Title = "milk"
-        },
-        new Item
-        {
-            Id = 2,
-            Title = "bread"
-        }
+        new Item("milk"),
+        new Item("bread"),
+        new Item("soup"),
+        new Item("milkslice"),
+        new Item("slicemilk")
     };
-    [HttpGet]
 
+    [HttpGet]
     public IActionResult GetItems()
     {
-
         return Ok(_items);
     }
+
     [HttpGet("{id}")]
     public IActionResult GetItemById([FromRoute] int id)
     {
@@ -37,5 +33,59 @@ public class ItemsController : ControllerBase
         }
 
         return Ok(item);
+    }
+    [HttpGet("search")]
+    public IActionResult GetItemByName([FromQuery] string name)
+    {
+        var items = _items.Where(x => x.Title.ToLower().Contains(name.ToLower()));
+
+        return Ok(items);
+    }
+    [HttpPost]
+    public IActionResult AddItem(Item item)
+    {
+        if(item.Title == null)
+        {
+            return BadRequest();
+        }
+
+        _items.Add(item);
+
+        return CreatedAtAction(nameof(GetItemById), new { id = item.Id }, item);
+    }
+
+    [HttpPut("{id:int}")]
+    public IActionResult UpdateItem([FromRoute] int id, [FromBody] Item updatedItem)
+    {
+        var item = _items.FirstOrDefault(x => x.Id == id);
+
+
+        if (string.IsNullOrWhiteSpace(updatedItem.Title))
+        {
+            return BadRequest();
+        }
+        if (item == null)
+        {
+            return NotFound();
+        }
+        item.Title = updatedItem.Title;
+
+
+        return Ok(item);
+    }
+    [HttpDelete("{id:int}")]
+    public IActionResult DeleteItem([FromRoute] int id)
+    {
+        var item = _items.FirstOrDefault(x => x.Id == id);
+
+        if (item == null)
+        {
+            return NotFound();
+        }
+       
+        _items.Remove(item);
+
+
+        return NoContent();
     }
 }
