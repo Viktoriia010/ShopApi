@@ -36,5 +36,13 @@ Content-Type: application/json
   "Title": "Fish",
   "Price": 5350.3
 }
- ###
+###
  GET https://e437-37-52-79-159.ngrok-free.app/api/product
+
+###
+POST {{ShopApp_HostAddress}}/api/user/register
+Content-Type: application/json
+{
+  "Id": 1,
+  "login": "admin"
+}

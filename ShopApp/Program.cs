@@ -4,13 +4,13 @@ using ShopApp.Middleware;
 using ShopApp.Services;
 
 namespace ShopApp;
-public static class MiddlewareExtensions
-{
-    public static IApplicationBuilder UseRequestTimer(this IApplicationBuilder builder)
-    {
-        return builder.UseMiddleware<RequestTimerMiddleware>();
-    }
-}
+//public static class MiddlewareExtensions
+//{
+//    public static IApplicationBuilder UseRequestTimer(this IApplicationBuilder builder)
+//    {
+//        return builder.UseMiddleware<RequestTimerMiddleware>();
+//    }
+//}
 public class Program
 {
     public static void Main(string[] args)
@@ -35,11 +35,14 @@ public class Program
 
         //app.UseHttpsRedirection();
 
+
+        app.UseMiddleware<RequestTimerMiddleware>();
+        app.UseMiddleware<UserCheckMiddleware>();
+        app.UseStaticFiles();
         app.UseAuthorization();
-
-
         app.MapControllers();
-        app.UseRequestTimer();
+        //app.UseRequestTimer();
+
         app.Run();
     }
 }
