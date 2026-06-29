@@ -46,3 +46,29 @@ Content-Type: application/json
   "Id": 1,
   "login": "admin"
 }
+
+###
+GET {{ShopApp_HostAddress}}/api/products
+Accept: application/json
+###
+GET {{ShopApp_HostAddress}}/api/products/4
+Accept: application/json
+###
+POST {{ShopApp_HostAddress}}/api/products
+Content-Type: application/json
+{
+  "Title": "chees",
+  "Price": "23.5"
+}
+###
+PUT {{ShopApp_HostAddress}}/api/products/7
+Content-Type: application/json
+{
+  "Title": "ubk",
+  "Price": "73.5"
+}
+###
+DELETE {{ShopApp_HostAddress}}/api/products/1
+###
+GET {{ShopApp_HostAddress}}/api/products/search?title=ณ์
+Accept: application/json
