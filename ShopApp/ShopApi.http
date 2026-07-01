@@ -1,33 +1,33 @@
-@ShopApp_HostAddress = http://localhost:5126
+@ShopApi_HostAddress = http://localhost:5126
 
 # GET {{ShopApp_HostAddress}}/weatherforecast/
 # Accept: application/json
 
 ###
-GET {{ShopApp_HostAddress}}/api/items
+GET {{ShopApi_HostAddress}}/api/items
 Accept: application/json
 ###
-GET {{ShopApp_HostAddress}}/api/items/2
-Accept: application/json
-
-###
-GET {{ShopApp_HostAddress}}/api/items/search?name=milki
+GET {{ShopApi_HostAddress}}/api/items/2
 Accept: application/json
 
 ###
-POST {{ShopApp_HostAddress}}/api/items
+GET {{ShopApi_HostAddress}}/api/items/search?name=milki
+Accept: application/json
+
+###
+POST {{ShopApi_HostAddress}}/api/items
 Content-Type: application/json
 {
   "Title": "sup"
 }
 ###
-PUT {{ShopApp_HostAddress}}/api/items/2
+PUT {{ShopApi_HostAddress}}/api/items/2
 Content-Type: application/json
 {
   "title": "uo"
 }
 ###
-DELETE {{ShopApp_HostAddress}}/api/items/1
+DELETE {{ShopApi_HostAddress}}/api/items/1
 
 ###
 POST https://e437-37-52-79-159.ngrok-free.app/api/product
@@ -37,10 +37,10 @@ Content-Type: application/json
   "Price": 5350.3
 }
 ###
- GET https://e437-37-52-79-159.ngrok-free.app/api/product
+GET https://e437-37-52-79-159.ngrok-free.app/api/product
 
 ###
-POST {{ShopApp_HostAddress}}/api/user/register
+POST {{ShopApi_HostAddress}}/api/user/register
 Content-Type: application/json
 {
   "Id": 1,
@@ -48,27 +48,27 @@ Content-Type: application/json
 }
 
 ###
-GET {{ShopApp_HostAddress}}/api/products
+GET {{ShopApi_HostAddress}}/api/products
 Accept: application/json
 ###
-GET {{ShopApp_HostAddress}}/api/products/4
+GET {{ShopApi_HostAddress}}/api/products/4
 Accept: application/json
 ###
-POST {{ShopApp_HostAddress}}/api/products
+POST {{ShopApi_HostAddress}}/api/products
 Content-Type: application/json
 {
   "Title": "chees",
   "Price": "23.5"
 }
 ###
-PUT {{ShopApp_HostAddress}}/api/products/7
+PUT {{ShopApi_HostAddress}}/api/products/7
 Content-Type: application/json
 {
   "Title": "ubk",
   "Price": "73.5"
 }
 ###
-DELETE {{ShopApp_HostAddress}}/api/products/1
+DELETE {{ShopApi_HostAddress}}/api/products/1
 ###
-GET {{ShopApp_HostAddress}}/api/products/search?title=ณ์
+GET {{ShopApi_HostAddress}}/api/products/search?title=ณ์
 Accept: application/json

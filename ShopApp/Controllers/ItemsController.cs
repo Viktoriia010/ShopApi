@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Razor.Hosting;
 using ShopDomain.Models;
 
-namespace ShopApp.Controllers;
+namespace Shop.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 public class ItemsController : ControllerBase

@@ -1,4 +1,4 @@
-﻿namespace ShopApp.Middleware;
+﻿namespace Shop.Api.Middleware;
 
 public class RequestTimerMiddleware(ILogger<RequestTimerMiddleware> _logger, RequestDelegate _next)
 {

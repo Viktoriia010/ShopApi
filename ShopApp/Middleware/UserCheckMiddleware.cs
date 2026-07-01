@@ -1,7 +1,7 @@
 ﻿using ShopDomain.Models;
 using System.Text.Json;
 
-namespace ShopApp.Middleware;
+namespace Shop.Api.Middleware;
 
 public class UserCheckMiddleware(ILogger<UserCheckMiddleware> _logger, RequestDelegate _next)
 {

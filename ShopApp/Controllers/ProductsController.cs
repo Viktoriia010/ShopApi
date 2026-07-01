@@ -1,10 +1,10 @@
 ﻿
 using Microsoft.AspNetCore.Mvc;
-using ShopApp.Filters;
-using ShopApp.Interfaces;
+using Shop.Api.Filters;
+using Shop.Api.Interfaces;
 using ShopDomain.Models;
 
-namespace ShopApp.Controllers;
+namespace Shop.Api.Controllers;
 //
 [ApiController]
 [Route("api/[controller]")]

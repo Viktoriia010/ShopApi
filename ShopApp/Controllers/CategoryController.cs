@@ -1,11 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ShopApp.Interfaces;
-using ShopApp.Services;
+using Shop.Api.Interfaces;
+using Shop.Api.Services;
 using ShopDomain.Models;
-namespace ShopApp.Controllers;
+namespace Shop.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+
+//public class CategoryCreateDto
+//{
+
+//}
 public class CategoryController(ICategoryService _categoryService) : ControllerBase
 {
 
@@ -14,5 +19,12 @@ public class CategoryController(ICategoryService _categoryService) : ControllerB
     {
         return _categoryService.GetAllCategories();
     }
+
+    //[HttpPost]
+    //public IActionResult CreateCategory(CategoryCreateDto dto)
+    //{
+
+    //}
+    
 
 }
