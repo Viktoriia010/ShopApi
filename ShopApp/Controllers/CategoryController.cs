@@ -43,6 +43,27 @@ public class CategoryController(ICategoryService _categoryService) : ControllerB
         }
         return Ok(category);
     }
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeleteCategory([FromRoute] int id)
+    {
+        var res = await _categoryService.DeleteCategoryAsync(id);
+        if (!res)
+        {
+            return NotFound();
+        }
+        return NoContent(); 
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> UpdateCategory([FromRoute] int id, [FromBody] CategoryUpdateDTO updateDTO)
+    {
+        var res = await _categoryService.UpdateCategoryAsync(id, updateDTO);
+        if (res == null)
+        {
+            return NotFound();
+        }
+        return Ok(res); 
+    }
 
 
 }

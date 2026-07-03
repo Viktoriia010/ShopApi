@@ -23,11 +23,17 @@ public class CategoryService(ICategoryRepository _repository) : ICategoryService
             ParentId = dto.ParentId,
         });
     }
+
+    public async Task<bool> DeleteCategoryAsync(int id)
+    {
+        return await _repository.DeleteCategoryAsync(id);
+    }
+
     public async Task<List<CategoryReadDTO>?> GetAllCategoriesAsync()
     {
-        var categories =  await _repository.GetAllCategoriesAsync();
+        var categories = await _repository.GetAllCategoriesAsync();
         List<CategoryReadDTO> dtos = new List<CategoryReadDTO>();
-        if(categories != null)
+        if (categories != null)
         {
             foreach (var item in categories)
             {
@@ -41,25 +47,51 @@ public class CategoryService(ICategoryRepository _repository) : ICategoryService
                 });
             }
         }
-        
+
         return dtos;
     }
 
     public async Task<CategoryReadDTO?> GetCategoryByIdAsync(int id)
     {
-        var res =   await _repository.GetCategoryByIdAsync(id);
+        var res = await _repository.GetCategoryByIdAsync(id);
         if (res != null)
         {
             return new CategoryReadDTO()
             {
-                Id= res.Id,
+                Id = res.Id,
                 Name = res.Name,
                 Slug = res.Slug,
-                Url= res.Url,
+                Url = res.Url,
                 ParentId = res.ParentId,
 
             };
         }
         return null;
+    }
+
+    public async Task<CategoryUpdateDTO?> UpdateCategoryAsync(int id, CategoryUpdateDTO updated)
+    {
+        var category = await _repository.GetCategoryByIdAsync(id);
+
+        if (category == null)
+            return null;
+
+        category.Name = updated.Name;
+        category.Url = updated.Url;
+        category.ParentId = updated.ParentId;
+        category.Slug = updated.Slug;
+        category.IsActive = updated.IsActive;
+
+        var result = await _repository.UpdateCategoryAsync(category);
+        if (result == null)
+            return null;
+        return new CategoryUpdateDTO
+        {
+            Name = result.Name,
+            Slug = result.Slug,
+            Url = result.Url,
+            IsActive = result.IsActive,
+            ParentId = result.ParentId
+        };
     }
 }
