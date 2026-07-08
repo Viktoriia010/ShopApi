@@ -27,6 +27,16 @@ public class Program
         {
             options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnection"));
         });
+        // ================= CORS =================
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAll", policy =>
+            {
+                policy.AllowAnyOrigin()
+                      .AllowAnyMethod()
+                      .AllowAnyHeader();
+            });
+        });
         // Add services to the container.
 
         builder.Services.AddControllers();
@@ -35,6 +45,7 @@ public class Program
         //------------------SERVICES-------------
         builder.Services.AddScoped<IProductService, ProductService>();
         builder.Services.AddScoped<ICategoryService, CategoryService>();
+        builder.Services.AddScoped<IImageService,  ImageService>();
         //------------------REPOSITORIES-------------
         builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
@@ -44,6 +55,7 @@ public class Program
         var app = builder.Build();
         app.UseSwagger();
         app.UseSwaggerUI();
+        app.UseCors("AllowAll");
         // Configure the HTTP request pipeline.
         //if (app.Environment.IsDevelopment())
         //{

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Shop.Api.Interfaces;
+using Shop.Api.Requests.Categories;
 using Shop.Api.Services;
 using Shop.Application.DTOs.CategoryDTOs;
 using Shop.Application.Interfaces.Services;
@@ -11,7 +12,7 @@ namespace Shop.Api.Controllers;
 [ApiController]
 [Route("api/v1/[controller]")]
 
-public class CategoryController(ICategoryService _categoryService) : ControllerBase
+public class CategoryController(ICategoryService _categoryService, IImageService _imageService, IConfiguration _configuration) : ControllerBase
 {
 
     //[HttpGet]
@@ -21,13 +22,37 @@ public class CategoryController(ICategoryService _categoryService) : ControllerB
     //}
 
 
+    //[HttpPost]
+    //public async Task<IActionResult> CreateCategory([FromForm]CategoryCreateRequest dto)
+    //{
+    //    int? id = await _categoryService.CreateCategoryAsync(dto);
+    //    return Ok($"Category created {id}");
+    //    //return 
+    //}
+
     [HttpPost]
-    public async Task<IActionResult> CreateCategory([FromBody]CategoryCreateDTO dto)
+    public async Task<IActionResult> CreateCategory([FromForm] CategoryCreateRequest dto)
     {
-        int? id = await _categoryService.CreateCategoryAsync(dto);
-        return Ok($"Category created {id}");
+        if (dto.Image != null)
+        {
+            dto.Url = (await _imageService.SaveFileAsync(dto.Image, _configuration["DirnameForFiles:Categories"])) ?? string.Empty;
+        }
+        var createDto = new CategoryCreateDTO
+        {
+            Name = dto.Name,
+            Url = dto.Url,
+            Slug = dto.Slug,
+            ParentId = dto.ParentId,
+        };
+        var id = await _categoryService.CreateCategoryAsync(createDto);
+        //return Ok($"Category created {id}");
+        return CreatedAtAction(
+                    nameof(GetCategoryById), // назва методу
+                    new { id },              // параметри маршруту
+                    new { id });             // тіло відповіді
     }
-    [HttpGet]
+
+        [HttpGet]
     public async Task<IActionResult> GetAllCategories()
     {
         var categories = await _categoryService.GetAllCategoriesAsync();
