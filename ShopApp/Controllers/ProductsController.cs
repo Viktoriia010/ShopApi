@@ -1,7 +1,12 @@
 ﻿
+using Azure.Core;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Api.Filters;
 using Shop.Api.Interfaces;
+using Shop.Api.Requests.Categories;
+using Shop.Api.Requests.Products;
+using Shop.Application.DTOs.CategoryDTOs;
+using Shop.Application.DTOs.ProductDTOs;
 using ShopDomain.Models;
 
 namespace Shop.Api.Controllers;
@@ -9,29 +14,78 @@ namespace Shop.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [LogActionFilter]
-public class ProductsController(IProductService _productService) : ControllerBase
+public class ProductsController(IProductService _productService, IImageService _imageService, IConfiguration _configuration) : ControllerBase
 {
+    [HttpPost]
+    public async Task<IActionResult> CreateProduct([FromForm] ProductCreateRequest dto)
+    {
+        var imageUrls = new List<string>();
+        if (dto.Images != null)
+        {
+            foreach (var image in dto.Images)
+            {
+                var fileName = await _imageService.SaveFileAsync(
+                    image,
+                    _configuration["DirnameForFiles:Products"]!
+                );
+
+                imageUrls.Add(fileName);
+            }
+        }
+        var createDto = new ProductCreateDTO
+        {
+            Name = dto.Name,
+            Description = dto.Description,
+            Price = dto.Price,
+            StockQty = dto.StockQty,
+            CategoryId = dto.CategoryId,
+            ImageUrls = imageUrls
+        };
+        var id = await _productService.CreateProductAsync(createDto);
+        return CreatedAtAction(
+                    nameof(GetProductById), // назва методу
+                    new { id },              // параметри маршруту
+                    new { id });             // тіло відповіді
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAllProducts()
+    {
+        var products = await _productService.GetAllProductsAsync();
+        return Ok(products);
+    }
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetProductById([FromRoute] int id)
+    {
+        var product = await _productService.GetProductByIdAsync(id);
+        if (product == null)
+        {
+            return NotFound();
+        }
+        return Ok(product);
+    }
+
     //private readonly IProductService _productService;
-    
+
     //public ProductController(IProductService productService)
     //{
     //    _productService = productService;
     //}
-    [HttpGet]
-    public List<Product> GetProducts()
-    {
-        return _productService.GetAllProducts();
-    }
-    [HttpGet("{id}")]
-    public IActionResult GetProductById([FromRoute] int id)
-    {
-        var product = new Product()
-        {
-            Name = $"Test Product {id}",
-            Price = 100
-        };
-        return Ok(product);
-    }
+    //[HttpGet]
+    //public List<Product> GetProducts()
+    //{
+    //    return _productService.GetAllProducts();
+    //}
+    //[HttpGet("{id}")]
+    //public IActionResult GetProductById([FromRoute] int id)
+    //{
+    //    var product = new Product()
+    //    {
+    //        Name = $"Test Product {id}",
+    //        Price = 100
+    //    };
+    //    return Ok(product);
+    //}
 
     //[HttpGet("{id:int}")]
     //public IActionResult GetProductById([FromRoute] int id)
@@ -43,16 +97,16 @@ public class ProductsController(IProductService _productService) : ControllerBas
     //    return Ok(product);
     //}
 
-    [HttpPost]
-    public IActionResult AddNewProduct([FromBody] Product product)
-    {
-        if(product == null)
-        {
-            return BadRequest();
-        }
-        _productService.AddProduct(product);
-        return CreatedAtAction(nameof(GetProductById),  new{ id = product.Id }, product);
-    }
+    //[HttpPost]
+    //public IActionResult AddNewProduct([FromBody] Product product)
+    //{
+    //    if(product == null)
+    //    {
+    //        return BadRequest();
+    //    }
+    //    _productService.AddProduct(product);
+    //    return CreatedAtAction(nameof(GetProductById),  new{ id = product.Id }, product);
+    //}
     //[HttpPut("{id:int}")]
     //public IActionResult UpdateProductById([FromRoute] int id, [FromBody] Product updatedProduct)
     //{

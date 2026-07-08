@@ -18,5 +18,6 @@ public class CategoryReadDTO
     public bool IsActive { get; set; } 
     // Self-referencing (підкатегорія)
     public int? ParentId { get; set; }
+    public ICollection<int>? Products { get; set; }
 
 }

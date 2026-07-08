@@ -5,6 +5,7 @@ using Shop.Api.Middleware;
 using Shop.Api.Services;
 using Shop.Application.Interfaces.Repository;
 using Shop.Application.Interfaces.Services;
+using Shop.Application.Mapping;
 using Shop.Application.Services;
 using Shop.Infrastructure.Data;
 using Shop.Infrastructure.Repositories;
@@ -27,6 +28,11 @@ public class Program
         {
             options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnection"));
         });
+        // ================= AutoMapper =================
+        builder.Services.AddAutoMapper(
+            _ => { },typeof(CategoryProfile).Assembly
+            );
+
         // ================= CORS =================
         builder.Services.AddCors(options =>
         {
@@ -48,6 +54,7 @@ public class Program
         builder.Services.AddScoped<IImageService,  ImageService>();
         //------------------REPOSITORIES-------------
         builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+        builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         //builder.Services.AddOpenApi();

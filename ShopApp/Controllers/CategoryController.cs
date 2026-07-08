@@ -15,21 +15,6 @@ namespace Shop.Api.Controllers;
 public class CategoryController(ICategoryService _categoryService, IImageService _imageService, IConfiguration _configuration) : ControllerBase
 {
 
-    //[HttpGet]
-    //public List<Category> GetCategories()
-    //{
-    //    return _categoryService.GetAllCategories();
-    //}
-
-
-    //[HttpPost]
-    //public async Task<IActionResult> CreateCategory([FromForm]CategoryCreateRequest dto)
-    //{
-    //    int? id = await _categoryService.CreateCategoryAsync(dto);
-    //    return Ok($"Category created {id}");
-    //    //return 
-    //}
-
     [HttpPost]
     public async Task<IActionResult> CreateCategory([FromForm] CategoryCreateRequest dto)
     {
