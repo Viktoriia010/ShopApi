@@ -68,27 +68,29 @@ public class CategoryService(ICategoryRepository _repository, IMapper _mapper) :
 
     public async Task<CategoryUpdateDTO?> UpdateCategoryAsync(int id, CategoryUpdateDTO updated)
     {
+       
         var category = await _repository.GetCategoryByIdAsync(id);
 
         if (category == null)
             return null;
-
-        category.Name = updated.Name;
-        category.Url = updated.Url;
-        category.ParentId = updated.ParentId;
-        category.Slug = updated.Slug;
-        category.IsActive = updated.IsActive;
+        _mapper.Map(updated, category);
+        //category.Name = updated.Name;
+        //category.Url = updated.Url;
+        //category.ParentId = updated.ParentId;
+        //category.Slug = updated.Slug;
+        //category.IsActive = updated.IsActive;
 
         var result = await _repository.UpdateCategoryAsync(category);
         if (result == null)
             return null;
-        return new CategoryUpdateDTO
-        {
-            Name = result.Name,
-            Slug = result.Slug,
-            Url = result.Url,
-            IsActive = result.IsActive,
-            ParentId = result.ParentId
-        };
+        return _mapper.Map<CategoryUpdateDTO>(result);
+        //return new CategoryUpdateDTO
+        //{
+        //    Name = result.Name,
+        //    Slug = result.Slug,
+        //    Url = result.Url,
+        //    IsActive = result.IsActive,
+        //    ParentId = result.ParentId
+        //};
     }
 }
