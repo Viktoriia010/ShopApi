@@ -17,7 +17,7 @@ public class ProductReadDTO
     public string? Description { get; set; }
     public decimal Price { get; set; }
     public int StockQty { get; set; } = 0;
-    public bool IsActive { get; set; } = true;
+    //public bool IsActive { get; set; } = true;
     public int CategoryId { get; set; }
     public List<ProductImageDTO> Images { get; set; } = [];
 }

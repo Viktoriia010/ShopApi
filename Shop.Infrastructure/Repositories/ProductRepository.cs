@@ -15,17 +15,19 @@ public class ProductRepository(ShopDbContext _context) : IProductRepository
     public async Task<int> AddProductAsync(Product product)
     {
         await _context.Products.AddAsync(product);
+
         await _context.SaveChangesAsync();
         return product.Id;
     }
 
     public async Task<List<Product>?> GetAllProductsAsync()
     {
-        return await _context.Products.ToListAsync();
+        return await _context.Products.Include(x => x.Images).ToListAsync();
     }
 
     public async Task<Product>? GetProductByIdAsync(int id)
     {
-        return await _context.Products.FindAsync(id);
+        return await _context.Products.Include(x => x.Images)
+        .FirstOrDefaultAsync(x => x.Id == id); 
     }
 }

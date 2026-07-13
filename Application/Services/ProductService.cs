@@ -1,4 +1,5 @@
-﻿using Shop.Api.Interfaces;
+﻿using AutoMapper;
+using Shop.Api.Interfaces;
 using Shop.Application.DTOs.CategoryDTOs;
 using Shop.Application.DTOs.ProductDTOs;
 using Shop.Application.Interfaces.Repository;
@@ -6,18 +7,34 @@ using ShopDomain.Models;
 
 namespace Shop.Api.Services;
 
-public class ProductService(IProductRepository _repository) : IProductService
+public class ProductService(IProductRepository _repository, IMapper _mapper) : IProductService
 {
     public async Task<int> CreateProductAsync(ProductCreateDTO dto)
     {
-        return await _repository.AddProductAsync(new Product()
+        Console.WriteLine($"Images count: {dto.ImagesUrl.Count}");
+
+        foreach (var url in dto.ImagesUrl)
+        {
+            Console.WriteLine(url);
+        }
+        var product = new Product
         {
             Name = dto.Name,
             Description = dto.Description,
             Price = dto.Price,
             StockQty = dto.StockQty,
-            CategoryId = dto.CategoryId,
-        });
+            CategoryId = dto.CategoryId
+        };
+
+        product.Images = dto.ImagesUrl
+            .Select(x => new ProductImage
+            {
+                Url = x,
+                IsPrimary = false
+            })
+            .ToList();
+        return await _repository.AddProductAsync(product
+            );
     }
 
     public async Task<List<ProductReadDTO>> GetAllProductsAsync()
@@ -28,16 +45,19 @@ public class ProductService(IProductRepository _repository) : IProductService
         {
             foreach (var item in products)
             {
-                dtos.Add(new ProductReadDTO()
-                {
-                    Id = item.Id,
-                    Name = item.Name,
-                    Description = item.Description,
-                    Price = item.Price,
-                    StockQty = item.StockQty,
-                    CategoryId = item.CategoryId,
-                    IsActive = item.IsActive,
-                });
+                dtos.Add(
+                    _mapper.Map<ProductReadDTO>(item)
+                //    new ProductReadDTO()
+                //{
+                //    Id = item.Id,
+                //    Name = item.Name,
+                //    Description = item.Description,
+                //    Price = item.Price,
+                //    StockQty = item.StockQty,
+                //    CategoryId = item.CategoryId,
+                //    IsActive = item.IsActive,
+                //}
+                    );
             }
         }
 
@@ -49,16 +69,17 @@ public class ProductService(IProductRepository _repository) : IProductService
         var res = await _repository.GetProductByIdAsync(id);
         if (res != null)
         {
-            return new ProductReadDTO()
-            {
-                Id = res.Id,
-                Name = res.Name,
-                Description = res.Description,
-                Price = res.Price,
-                StockQty = res.StockQty,
-                CategoryId = res.CategoryId,
-                IsActive = res.IsActive
-            };
+            return _mapper.Map<ProductReadDTO>(res);
+                //new ProductReadDTO()
+            //{
+            //    Id = res.Id,
+            //    Name = res.Name,
+            //    Description = res.Description,
+            //    Price = res.Price,
+            //    StockQty = res.StockQty,
+            //    CategoryId = res.CategoryId,
+            //    IsActive = res.IsActive
+            //};
         }
         return null;
     }

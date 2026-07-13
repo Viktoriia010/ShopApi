@@ -1,9 +1,14 @@
-﻿using Shop.Application.DTOs.CategoryDTOs;
-using Shop.Application.DTOs.ProductDTOs;
+﻿using Shop.Application.DTOs.ProductDTOs;
 
 namespace Shop.Api.Requests.Products;
 
-public class ProductCreateRequest : ProductCreateDTO
+public class ProductCreateRequest 
 {
-    public List<IFormFile>? Images { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public decimal Price { get; set; }
+    public int StockQty { get; set; } = 0;
+    public int CategoryId { get; set; }
+    public List<IFormFile> Images { get; set; } = [];
+
 }

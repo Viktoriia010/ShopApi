@@ -73,7 +73,7 @@ public class Program
 
 
         app.UseMiddleware<RequestTimerMiddleware>();
-        app.UseMiddleware<UserCheckMiddleware>();
+        //app.UseMiddleware<UserCheckMiddleware>();
         app.UseStaticFiles();
         app.UseAuthorization();
         app.MapControllers();

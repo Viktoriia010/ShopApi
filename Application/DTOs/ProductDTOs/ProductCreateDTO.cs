@@ -1,4 +1,6 @@
-﻿using ShopDomain.Models;
+﻿using Microsoft.AspNetCore.Http;
+using Shop.Application.DTOs.ProductImageDTOs;
+using ShopDomain.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -16,5 +18,5 @@ public class ProductCreateDTO
     public decimal Price { get; set; }
     public int StockQty { get; set; } = 0;
     public int CategoryId { get; set; }
-    public List<string> ImageUrls { get; set; } = [];
+    public List<string> ImagesUrl { get; set; } = [];
 }

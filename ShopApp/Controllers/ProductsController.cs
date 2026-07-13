@@ -1,4 +1,5 @@
 ﻿
+using AutoMapper;
 using Azure.Core;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Api.Filters;
@@ -7,6 +8,7 @@ using Shop.Api.Requests.Categories;
 using Shop.Api.Requests.Products;
 using Shop.Application.DTOs.CategoryDTOs;
 using Shop.Application.DTOs.ProductDTOs;
+using Shop.Application.DTOs.ProductImageDTOs;
 using ShopDomain.Models;
 
 namespace Shop.Api.Controllers;
@@ -14,13 +16,14 @@ namespace Shop.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [LogActionFilter]
-public class ProductsController(IProductService _productService, IImageService _imageService, IConfiguration _configuration) : ControllerBase
+public class ProductsController(IProductService _productService, IImageService _imageService, IConfiguration _configuration, IMapper _mapper) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> CreateProduct([FromForm] ProductCreateRequest dto)
     {
-        var imageUrls = new List<string>();
-        if (dto.Images != null)
+
+        var imageUrls = new List<string>(); 
+        if (dto.Images != null && dto.Images.Any())
         {
             foreach (var image in dto.Images)
             {
@@ -33,19 +36,21 @@ public class ProductsController(IProductService _productService, IImageService _
             }
         }
         var createDto = new ProductCreateDTO
-        {
-            Name = dto.Name,
-            Description = dto.Description,
-            Price = dto.Price,
-            StockQty = dto.StockQty,
-            CategoryId = dto.CategoryId,
-            ImageUrls = imageUrls
-        };
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                Price = dto.Price,
+                StockQty = dto.StockQty,
+                CategoryId = dto.CategoryId,
+                ImagesUrl = imageUrls
+
+            };
         var id = await _productService.CreateProductAsync(createDto);
         return CreatedAtAction(
                     nameof(GetProductById), // назва методу
                     new { id },              // параметри маршруту
                     new { id });             // тіло відповіді
+    
     }
 
     [HttpGet]
