@@ -66,6 +66,84 @@ public class CategoryService(ICategoryRepository _repository, IMapper _mapper) :
         return dto;
     }
 
+    public async Task<List<CategoryReadDTO>> GetParentsCategoryByIdAsync(CategoryReadDTO dto)
+    {
+        List<CategoryReadDTO> categories = new List<CategoryReadDTO>();
+
+        while (dto.ParentId != null)
+        {
+            var parent = await GetCategoryByIdAsync(dto.ParentId.Value);
+            categories.Add(parent);
+            dto = parent;
+
+        }
+
+        return categories;
+    }
+    public async Task<List<CategoryReadDTO>> GetChildrensCategoryByIdAsync(int id)
+    {
+        var categories = await GetAllCategoriesAsync();
+
+        if (categories == null)
+        {
+            return [];
+        }
+        var res = categories.Where(c => c.ParentId == id).ToList();
+        List<CategoryReadDTO> childrens = new List<CategoryReadDTO>();
+        foreach (var item in res)
+        {
+            childrens.Add(item);
+
+            var descendants = await GetChildrensCategoryByIdAsync(item.Id);
+
+            childrens.AddRange(descendants);
+        }
+
+        return childrens;
+    }
+    private CategoryTreeDTO BuildTree(CategoryReadDTO category,List<CategoryReadDTO> allCategories)
+    {
+        var node = new CategoryTreeDTO
+        {
+            Id = category.Id,
+            Name = category.Name,
+            ParentId = category.ParentId
+        };
+
+        var children = allCategories
+            .Where(c => c.ParentId == category.Id)
+            .ToList();
+
+        foreach (var child in children)
+        {
+            node.Children.Add(BuildTree(child, allCategories));
+        }
+
+        return node;
+    }
+    public async Task<List<CategoryTreeDTO>> GetTreeCategoryByIdAsync()
+    {
+        var categories = await GetAllCategoriesAsync();
+
+        if (categories == null || !categories.Any())
+        {
+            return new List<CategoryTreeDTO>();
+        }
+
+        var rootCategories = categories
+            .Where(c => c.ParentId == null)
+            .ToList();
+
+        var tree = new List<CategoryTreeDTO>();
+
+        foreach (var category in rootCategories)
+        {
+            tree.Add(BuildTree(category, categories));
+        }
+
+        return tree;
+    }
+
     public async Task<CategoryUpdateDTO?> UpdateCategoryAsync(int id, CategoryUpdateDTO updated)
     {
        
@@ -93,4 +171,6 @@ public class CategoryService(ICategoryRepository _repository, IMapper _mapper) :
         //    ParentId = result.ParentId
         //};
     }
+
+
 }

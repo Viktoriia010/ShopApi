@@ -37,12 +37,13 @@ public class CategoryController(ICategoryService _categoryService, IImageService
                     new { id });             // тіло відповіді
     }
 
-        [HttpGet]
+    [HttpGet]
     public async Task<IActionResult> GetAllCategories()
     {
         var categories = await _categoryService.GetAllCategoriesAsync();
         return Ok(categories);
     }
+
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetCategoryById([FromRoute] int id)
     {
@@ -53,6 +54,42 @@ public class CategoryController(ICategoryService _categoryService, IImageService
         }
         return Ok(category);
     }
+
+
+    [HttpGet("{id:int}/parents")]
+    public async Task<IActionResult> GetParentsCategoryById([FromRoute] int id)
+    {
+        var category = await _categoryService.GetCategoryByIdAsync(id);
+        if (category == null)
+        {
+            return NotFound();
+        }
+        var res = await _categoryService.GetParentsCategoryByIdAsync(category);
+
+        return Ok(res);
+    }
+
+    [HttpGet("{id:int}/childrens")]
+    public async Task<IActionResult> GetChildrensCategoryById([FromRoute] int id)
+    {
+        var category = await _categoryService.GetCategoryByIdAsync(id);
+        if (category == null)
+        {
+            return NotFound();
+        }
+        var res = await _categoryService.GetChildrensCategoryByIdAsync(category.Id);
+
+        return Ok(res);
+    }
+
+    [HttpGet("tree")]
+    public async Task<IActionResult> GetTreeCategoryById()
+    {
+        var category = await _categoryService.GetTreeCategoryByIdAsync();
+
+        return Ok(category);
+    }
+
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteCategory([FromRoute] int id)
     {

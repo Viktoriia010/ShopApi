@@ -15,5 +15,8 @@ public interface ICategoryService
     Task<CategoryReadDTO?> GetCategoryByIdAsync(int id);
     Task<bool> DeleteCategoryAsync(int id);
     Task<CategoryUpdateDTO?> UpdateCategoryAsync(int id, CategoryUpdateDTO updated);
+    Task<List<CategoryReadDTO>> GetParentsCategoryByIdAsync(CategoryReadDTO dto);
+    Task<List<CategoryReadDTO>> GetChildrensCategoryByIdAsync(int id);
+    Task<List<CategoryTreeDTO>> GetTreeCategoryByIdAsync();
 
 }
