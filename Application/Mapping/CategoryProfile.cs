@@ -20,5 +20,7 @@ public class CategoryProfile:Profile
 
         CreateMap<Category, CategoryUpdateDTO>();
         CreateMap<CategoryUpdateDTO, Category>();
+        CreateMap<CategoryReadDTO, CategoryTreeDTO>();
+
     }
 }

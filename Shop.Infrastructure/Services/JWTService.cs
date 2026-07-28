@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -39,4 +40,9 @@ public class JWTService : IJWTService
             signingCredentials: credentials);
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+    //public (string, int) GenerateRefreshToken()
+    //{
+    //    return (Convert.ToBase64String(
+    //        RandomNumberGenerator.GetBytes(64)), _jwtSettings.ExpiresRefreshTokenDay);
+    //}
 }

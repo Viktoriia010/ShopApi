@@ -17,4 +17,5 @@ public class HashHelper : IHashHelper
     {
         return BCrypt.Net.BCrypt.EnhancedVerify(password, hash);
     }
+
 }

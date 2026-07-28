@@ -49,7 +49,7 @@ public class Program
 
         // ================= AutoMapper =================
         builder.Services.AddAutoMapper(
-            _ => { },typeof(CategoryProfile).Assembly,
+            _ => { },typeof(CategoryProfile).Assembly,typeof(ProductProfile).Assembly,
             typeof(UserProfile).Assembly
             );
 

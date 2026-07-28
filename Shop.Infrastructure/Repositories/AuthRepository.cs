@@ -11,12 +11,24 @@ namespace Shop.Infrastructure.Repositories;
 
 public class AuthRepository(ShopDbContext _context) : IAuthRepository
 {
+    //public Task<RefreshToken?> GetByTokenAsync(string token)
+    //{
+    //    throw new NotImplementedException();
+    //}
+
     public async Task<bool> IsExistEmailAsync(string email)
     {
         var userFromDb = await _context.Users.FirstOrDefaultAsync(user => user.Email == email);
         if (userFromDb == null)
             return false;
         return true;
+    }
+    public async Task<User?> IsExistUserAsync(string email)
+    {
+        var userFromDb = await _context.Users.FirstOrDefaultAsync(user => user.Email == email);
+        if (userFromDb == null)
+            return null;
+        return userFromDb;
     }
     public async Task<User?> RegisterUserAsync(User user, string hash)
     {

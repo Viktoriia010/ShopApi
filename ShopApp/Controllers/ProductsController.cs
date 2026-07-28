@@ -2,6 +2,7 @@
 using AutoMapper;
 using Azure.Core;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Shop.Api.Filters;
 using Shop.Api.Interfaces;
 using Shop.Api.Requests.Categories;
@@ -14,9 +15,9 @@ using ShopDomain.Models;
 namespace Shop.Api.Controllers;
 //
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
 [LogActionFilter]
-public class ProductsController(IProductService _productService, IImageService _imageService, IConfiguration _configuration, IMapper _mapper) : ControllerBase
+public class ProductsController(IProductService _productService, IImageService _imageService, IConfiguration _configuration) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> CreateProduct([FromForm] ProductCreateRequest dto)
@@ -68,6 +69,13 @@ public class ProductsController(IProductService _productService, IImageService _
             return NotFound();
         }
         return Ok(product);
+    }
+
+    [HttpGet("category/{categoryId}")]
+    public async Task<IActionResult> GetProductsByCategory(int categoryId)
+    {
+        var products = await _productService.GetProductsByCategoryAsync(categoryId);
+        return Ok(products);
     }
 
     //private readonly IProductService _productService;
@@ -134,7 +142,7 @@ public class ProductsController(IProductService _productService, IImageService _
     //        return NoContent();
     //    }
     //    return NotFound();
-        
+
     //}
     //[HttpGet("search")]
     //public IActionResult SearchProductByName([FromQuery] string title)
@@ -149,6 +157,6 @@ public class ProductsController(IProductService _productService, IImageService _
     //        return BadRequest();
     //    }
     //    return Ok(res);
-        
+
     //}
 }

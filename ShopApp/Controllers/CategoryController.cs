@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Shop.Api.Interfaces;
 using Shop.Api.Requests.Categories;
 using Shop.Api.Services;
@@ -15,6 +16,7 @@ namespace Shop.Api.Controllers;
 public class CategoryController(ICategoryService _categoryService, IImageService _imageService, IConfiguration _configuration) : ControllerBase
 {
 
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> CreateCategory([FromForm] CategoryCreateRequest dto)
     {
@@ -30,11 +32,19 @@ public class CategoryController(ICategoryService _categoryService, IImageService
             ParentId = dto.ParentId,
         };
         var id = await _categoryService.CreateCategoryAsync(createDto);
+
+        if (id == null)
+        {
+            return BadRequest("Category was not created.");
+        }
+
+
+        var category = await _categoryService.GetCategoryByIdAsync(id.Value);
         //return Ok($"Category created {id}");
         return CreatedAtAction(
                     nameof(GetCategoryById), // назва методу
                     new { id },              // параметри маршруту
-                    new { id });             // тіло відповіді
+                    category);             // тіло відповіді
     }
 
     [HttpGet]

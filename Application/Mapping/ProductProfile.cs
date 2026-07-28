@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 namespace Shop.Application.Mapping;
 
 public class ProductProfile:Profile
@@ -20,6 +19,5 @@ public class ProductProfile:Profile
         //CategoryCreateDto -> Category
         CreateMap<Product, ProductReadDTO>();
         CreateMap<ProductImage, ProductImageDTO>();
-        //CreateMap<ProductCreateRequest, Product>
     }
 }

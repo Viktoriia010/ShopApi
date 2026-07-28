@@ -103,12 +103,13 @@ public class CategoryService(ICategoryRepository _repository, IMapper _mapper) :
     }
     private CategoryTreeDTO BuildTree(CategoryReadDTO category,List<CategoryReadDTO> allCategories)
     {
-        var node = new CategoryTreeDTO
-        {
-            Id = category.Id,
-            Name = category.Name,
-            ParentId = category.ParentId
-        };
+        //var node = new CategoryTreeDTO
+        //{
+        //    Id = category.Id,
+        //    Name = category.Name,
+        //    ParentId = category.ParentId
+        //};
+        var node = _mapper.Map<CategoryTreeDTO>(category);
 
         var children = allCategories
             .Where(c => c.ParentId == category.Id)

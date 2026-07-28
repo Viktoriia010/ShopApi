@@ -30,4 +30,12 @@ public class ProductRepository(ShopDbContext _context) : IProductRepository
         return await _context.Products.Include(x => x.Images)
         .FirstOrDefaultAsync(x => x.Id == id); 
     }
+
+    public async Task<List<Product>?> GetProductsByCategoryAsync(int categoryId)
+    {
+        return await _context.Products
+        .Where(p => p.CategoryId == categoryId)
+        .Include(p => p.Images)
+        .ToListAsync();
+    }
 }

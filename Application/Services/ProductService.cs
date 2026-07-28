@@ -11,58 +11,38 @@ public class ProductService(IProductRepository _repository, IMapper _mapper) : I
 {
     public async Task<int> CreateProductAsync(ProductCreateDTO dto)
     {
-        Console.WriteLine($"Images count: {dto.ImagesUrl.Count}");
+        var product = _mapper.Map<Product>(dto);
+        //    new Product
+        //{
+        //    Name = dto.Name,
+        //    Description = dto.Description,
+        //    Price = dto.Price,
+        //    StockQty = dto.StockQty,
+        //    CategoryId = dto.CategoryId
+        //};
 
-        foreach (var url in dto.ImagesUrl)
-        {
-            Console.WriteLine(url);
-        }
-        var product = new Product
-        {
-            Name = dto.Name,
-            Description = dto.Description,
-            Price = dto.Price,
-            StockQty = dto.StockQty,
-            CategoryId = dto.CategoryId
-        };
-
-        product.Images = dto.ImagesUrl
+        product.Images = dto.ImagesUrl?
             .Select(x => new ProductImage
             {
                 Url = x,
                 IsPrimary = false
             })
-            .ToList();
-        return await _repository.AddProductAsync(product
-            );
+            .ToList() ?? new List<ProductImage>();
+        return await _repository.AddProductAsync(product);
     }
 
     public async Task<List<ProductReadDTO>> GetAllProductsAsync()
     {
         var products = await _repository.GetAllProductsAsync();
-        List<ProductReadDTO> dtos = new List<ProductReadDTO>();
-        if (products != null)
+
+        if (products == null)
         {
-            foreach (var item in products)
-            {
-                dtos.Add(
-                    _mapper.Map<ProductReadDTO>(item)
-                //    new ProductReadDTO()
-                //{
-                //    Id = item.Id,
-                //    Name = item.Name,
-                //    Description = item.Description,
-                //    Price = item.Price,
-                //    StockQty = item.StockQty,
-                //    CategoryId = item.CategoryId,
-                //    IsActive = item.IsActive,
-                //}
-                    );
-            }
+            return new List<ProductReadDTO>();
         }
 
-        return dtos;
+        return _mapper.Map<List<ProductReadDTO>>(products);
     }
+
 
     public async Task<ProductReadDTO?> GetProductByIdAsync(int id)
     {
@@ -83,6 +63,18 @@ public class ProductService(IProductRepository _repository, IMapper _mapper) : I
         }
         return null;
     }
+
+    public async Task<List<ProductReadDTO>?> GetProductsByCategoryAsync(int categoryId)
+    {
+        var res = await _repository.GetProductsByCategoryAsync(categoryId);
+        if (res != null)
+        {
+            return _mapper.Map<List<ProductReadDTO>>(res);
+        }
+        return null;
+    }
+
+
     //public ProductService()
     //{
     //    _products.Add(new Product("milk", 40.9f));
