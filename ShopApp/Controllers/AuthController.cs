@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Shop.Application.DTOs.UserDTOs;
 using Shop.Application.Interfaces.Services;
 
@@ -12,42 +13,51 @@ public class AuthController(IAuthService _authService):ControllerBase
     public async Task<IActionResult> RegisterUser([FromBody] UserCreateDTO dto)
     {
         var user = await _authService.RegisterAsync(dto);
-        if (user.User == null || user.Token == null)
+        if (user.User == null || user.Token == null|| user.RefreshToken.RefreshToken == null)
             return BadRequest("Користувач за таким email вже існує");
 
-        //Response.Cookies.Append("accessToken", user.Token, new CookieOptions
-        //{
-        //    HttpOnly = true,
-        //    Secure = true,
-        //    SameSite = SameSiteMode.Strict,
-        //    Expires = DateTimeOffset.UtcNow.AddMinutes(30)
-        //});
-        return Ok(new { user = user.User, token = user.Token });
+        Response.Cookies.Append("refreshToken", user.RefreshToken.RefreshToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTimeOffset.UtcNow.AddDays(user.RefreshToken.ExpireDays)
+        });
+        return Ok(new { user = user.User, token = user.Token, refreshToken = user.RefreshToken.RefreshToken });
     }
     [HttpPost("authentication")]
     public async Task<IActionResult> UserAuthentication([FromBody] UserLoginDTO dto)
     {
         var token = await _authService.UserAuthenticationAsync(dto);
-        if (token == null)
+        if (token.AccessToken == null || token.RefreshToken.RefreshToken == null)
         {
             return Unauthorized("Невірний email чи пароль");
         }
-        return Ok(new { token });
+        Response.Cookies.Append("refreshToken", token.RefreshToken.RefreshToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTimeOffset.UtcNow.AddDays(token.RefreshToken.ExpireDays)
+        });
+        return Ok(new { token.AccessToken , token.RefreshToken.RefreshToken });
     }
-        //[HttpPost("refresh")]
-        //public async Task<IActionResult> GetRefreshToken()
-        //{
-        //    var refreshToken = Request.Cookies["refreshToken"];
-        //    if (string.IsNullOrEmpty(refreshToken))
-        //        return Unauthorized();
-        //    Response.Cookies.Append("refreshToken", user.Token,
-        //    new CookieOptions
-        //    {
-        //        HttpOnly = true,
-        //        Secure = true,
-        //        SameSite = SameSiteMode.Strict,
-        //        //Expires = DateTimeOffset.UtcNow.AddMinutes(30)
-        //    });
-        //    return Ok(new { user = user.User, token = user.Token });
-        //}
+    [HttpPost("refresh")]
+    public async Task<IActionResult> GetRefreshToken()
+    {
+        var refreshToken = Request.Cookies["refreshToken"];
+        if (string.IsNullOrEmpty(refreshToken))
+            return Unauthorized();
+
+        var result = await _authService.RefreshTokenAsync(refreshToken);
+
+
+        if (result == null)
+            return Unauthorized();
+
+        return Ok(new
+        {
+            accessToken = result
+        });
     }
+}

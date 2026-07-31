@@ -9,5 +9,6 @@ namespace Shop.Application.Interfaces.Repository;
 
 public interface IRefreshTokenRepository
 {
-    Task AddResreshToken(RefreshToken token);
+    Task AddRefreshToken(RefreshToken token);
+    Task<RefreshToken?> GetValidRefreshTokenAsync(string token);
 }

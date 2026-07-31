@@ -10,4 +10,5 @@ namespace Shop.Application.Interfaces.Services;
 public interface IJWTService
 {
     public string GenerateAccessToken(UserLoginDTO userLoginDto, string role);
+    public (string? Token, int ExpireDays) GenerateRefreshToken();
 }

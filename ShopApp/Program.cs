@@ -112,6 +112,7 @@ public class Program
         builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
         builder.Services.AddScoped<IProductRepository, ProductRepository>();
         builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+        builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         //builder.Services.AddOpenApi();
