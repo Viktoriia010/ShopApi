@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Shop.Application.Services;
 
-public class CategoryService(ICategoryRepository _repository, IMapper _mapper) : ICategoryService
+public class CategoryService(ICategoryRepository _repository, IMapper _mapper, ICachingService _cacheService) : ICategoryService
 {
     //додати автомапер
     public async Task<int?> CreateCategoryAsync(CategoryCreateDTO dto)
@@ -34,25 +34,33 @@ public class CategoryService(ICategoryRepository _repository, IMapper _mapper) :
 
     public async Task<List<CategoryReadDTO>?> GetAllCategoriesAsync()
     {
-        var categories = await _repository.GetAllCategoriesAsync();
-        List<CategoryReadDTO> dtos = new List<CategoryReadDTO>();
-        if (categories != null && categories.Count > 0)
+        var cache = await _cacheService.GetAsync<List<CategoryReadDTO>>("Categories");
+        if (cache == null)
         {
-            dtos = _mapper.Map<List<CategoryReadDTO>>(categories);
-            //foreach (var item in categories)
-            //{
-            //    dtos.Add(new CategoryReadDTO()
-            //    {
-            //        Id = item.Id,
-            //        Name = item.Name,
-            //        Slug = item.Slug,
-            //        Url = item.Url,
-            //        ParentId = item.ParentId,
-            //    });
-            //}
-        }
+            var categories = await _repository.GetAllCategoriesAsync();
+            cache = _mapper.Map<List<CategoryReadDTO>>(categories);
+            await _cacheService.SetAsync("Categories", cache, null);
 
-        return dtos;
+        }
+        return cache;
+        //List<CategoryReadDTO> dtos = new List<CategoryReadDTO>();
+        //if (categories != null && categories.Count > 0)
+        //{
+        //    dtos = _mapper.Map<List<CategoryReadDTO>>(categories);
+        //    //foreach (var item in categories)
+        //    //{
+        //    //    dtos.Add(new CategoryReadDTO()
+        //    //    {
+        //    //        Id = item.Id,
+        //    //        Name = item.Name,
+        //    //        Slug = item.Slug,
+        //    //        Url = item.Url,
+        //    //        ParentId = item.ParentId,
+        //    //    });
+        //    //}
+        //}
+
+        //return dtos;
     }
 
     public async Task<CategoryReadDTO?> GetCategoryByIdAsync(int id)

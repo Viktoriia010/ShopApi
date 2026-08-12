@@ -63,6 +63,16 @@ public class Program
                       .AllowAnyHeader();
             });
         });
+
+        //builder.Services.AddCors(options =>
+        //{
+        //    options.AddPolicy("ProductionPolicy", policy =>
+        //    {
+        //        policy.WithOrigins("https://example.com", "https://www.example.com")
+        //              .WithMethods("GET", "POST", "PUT", "DELETE")
+        //              .WithHeaders("Content-Type", "Authorization");
+        //    });
+        //});
         // Add services to the container.
 
         builder.Services.AddControllers();
@@ -100,10 +110,14 @@ public class Program
         });
         //builder.Services.AddSwaggerGen();
         //builder.Services.AddSwaggerGen();
+
+        //===================CACHE=======================
+        builder.Services.AddMemoryCache();
         //------------------SERVICES-------------
         builder.Services.AddScoped<IProductService, ProductService>();
         builder.Services.AddScoped<ICategoryService, CategoryService>();
         builder.Services.AddScoped<IImageService,  ImageService>();
+        builder.Services.AddScoped<ICachingService, MemoryCachingService>();
         builder.Services.AddScoped<IAuthService,  AuthService>();
         builder.Services.AddScoped<IJWTService,  JWTService>();
         //------------------HELPERS-------------
@@ -140,9 +154,27 @@ public class Program
     });
         builder.Services.AddAuthorization();
         var app = builder.Build();
+        //------------------SEEDING--------------
+        using (var scope = app.Services.CreateScope())
+        {
+            var services = scope.ServiceProvider;
+            try
+            {
+                DbSeeder.SeedAdminAsync(services).Wait();
+            }
+            catch (Exception ex)
+            {
+                var logger = services.GetRequiredService<ILogger<Program>>();
+                logger.LogError(ex, "An error occurred while seeding the database");
+            }
+
+        }
+
+
         app.UseSwagger();
         app.UseSwaggerUI();
         app.UseCors("AllowAll");
+        //app.UseCors("ProductionPolicy");
         // Configure the HTTP request pipeline.
         //if (app.Environment.IsDevelopment())
         //{
@@ -155,7 +187,7 @@ public class Program
         app.UseMiddleware<RequestTimerMiddleware>();
         //app.UseMiddleware<UserCheckMiddleware>();
         app.UseStaticFiles();
-        app.UseAuthorization();
+        //app.UseAuthorization();
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
