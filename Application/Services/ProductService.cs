@@ -3,23 +3,16 @@ using Shop.Api.Interfaces;
 using Shop.Application.DTOs.CategoryDTOs;
 using Shop.Application.DTOs.ProductDTOs;
 using Shop.Application.Interfaces.Repository;
+using Shop.Application.Interfaces.Services;
 using ShopDomain.Models;
 
 namespace Shop.Api.Services;
 
-public class ProductService(IProductRepository _repository, IMapper _mapper) : IProductService
+public class ProductService(IProductRepository _repository, IMapper _mapper, ICachingService _cacheService) : IProductService
 {
     public async Task<int> CreateProductAsync(ProductCreateDTO dto)
     {
         var product = _mapper.Map<Product>(dto);
-        //    new Product
-        //{
-        //    Name = dto.Name,
-        //    Description = dto.Description,
-        //    Price = dto.Price,
-        //    StockQty = dto.StockQty,
-        //    CategoryId = dto.CategoryId
-        //};
 
         product.Images = dto.ImagesUrl?
             .Select(x => new ProductImage
@@ -33,14 +26,24 @@ public class ProductService(IProductRepository _repository, IMapper _mapper) : I
 
     public async Task<List<ProductReadDTO>> GetAllProductsAsync()
     {
-        var products = await _repository.GetAllProductsAsync();
-
-        if (products == null)
+        var cache = await _cacheService.GetAsync<List<ProductReadDTO>>("Products");
+        if (cache == null)
         {
-            return new List<ProductReadDTO>();
-        }
+            var products = await _repository.GetAllProductsAsync();
+            cache = _mapper.Map<List<ProductReadDTO>>(products);
+            await _cacheService.SetAsync("Products", cache, null);
 
-        return _mapper.Map<List<ProductReadDTO>>(products);
+        }
+        return cache;
+
+        //var products = await _repository.GetAllProductsAsync();
+
+        //if (products == null)
+        //{
+        //    return new List<ProductReadDTO>();
+        //}
+
+        //return _mapper.Map<List<ProductReadDTO>>(products);
     }
 
 
@@ -50,16 +53,6 @@ public class ProductService(IProductRepository _repository, IMapper _mapper) : I
         if (res != null)
         {
             return _mapper.Map<ProductReadDTO>(res);
-                //new ProductReadDTO()
-            //{
-            //    Id = res.Id,
-            //    Name = res.Name,
-            //    Description = res.Description,
-            //    Price = res.Price,
-            //    StockQty = res.StockQty,
-            //    CategoryId = res.CategoryId,
-            //    IsActive = res.IsActive
-            //};
         }
         return null;
     }
