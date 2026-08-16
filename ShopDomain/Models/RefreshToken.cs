@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace ShopDomain.Models;
 
+[Table("refresh-token")]
 public class RefreshToken
 {
     [Column("id")]

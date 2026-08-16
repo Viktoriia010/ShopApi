@@ -120,6 +120,9 @@ public class Program
         builder.Services.AddScoped<ICachingService, MemoryCachingService>();
         builder.Services.AddScoped<IAuthService,  AuthService>();
         builder.Services.AddScoped<IJWTService,  JWTService>();
+        builder.Services.AddScoped<IAdminService, AdminService>();
+        builder.Services.AddScoped<IPasswordResetTokenService, PasswordResetTokenService>();
+        builder.Services.AddScoped<IEmailService, EmailService>();
         //------------------HELPERS-------------
         builder.Services.AddSingleton<IHashHelper, HashHelper>();
         //------------------REPOSITORIES-------------
@@ -127,6 +130,7 @@ public class Program
         builder.Services.AddScoped<IProductRepository, ProductRepository>();
         builder.Services.AddScoped<IAuthRepository, AuthRepository>();
         builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        builder.Services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         //builder.Services.AddOpenApi();

@@ -11,10 +11,11 @@ namespace Shop.Infrastructure.Repositories;
 
 public class AuthRepository(ShopDbContext _context) : IAuthRepository
 {
-    //public Task<RefreshToken?> GetByTokenAsync(string token)
-    //{
-    //    throw new NotImplementedException();
-    //}
+    public async Task AddUserAsync(User user)
+    {
+        await _context.Users.AddAsync(user);
+        await _context.SaveChangesAsync();
+    }
 
     public async Task<bool> IsExistEmailAsync(string email)
     {
@@ -43,5 +44,11 @@ public class AuthRepository(ShopDbContext _context) : IAuthRepository
          3) Додати користувача у БД
          4) Зробити токен, скоріше за все не тут будемо робити
          */
+    }
+
+    public async Task UpdateUserAsync(User user)
+    {
+        _context.Users.Update(user);
+        await _context.SaveChangesAsync();
     }
 }

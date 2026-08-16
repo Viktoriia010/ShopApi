@@ -20,9 +20,8 @@ public class User : BaseEntity
     [Column("email")]
     public string Email { get; set; } = string.Empty;
 
-    [Required]
     [Column("password_hash")]
-    public string PasswordHash { get; set; } = string.Empty;
+    public string? PasswordHash { get; set; } = string.Empty;
 
     [Column("role")]
     public UserRole Role { get; set; } = UserRole.User;
