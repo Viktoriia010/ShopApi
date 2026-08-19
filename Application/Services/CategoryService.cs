@@ -65,13 +65,22 @@ public class CategoryService(ICategoryRepository _repository, IMapper _mapper, I
 
     public async Task<CategoryReadDTO?> GetCategoryByIdAsync(int id)
     {
-        CategoryReadDTO dto = null;
-        var res = await _repository.GetCategoryByIdAsync(id);
-        if (res != null)
+        var cacheKey = $"Category_{id}";
+        var cache = await _cacheService.GetAsync<CategoryReadDTO>(cacheKey);
+        if(cache == null)
         {
-            dto = _mapper.Map<CategoryReadDTO>(res);
+            var res = await _repository.GetCategoryByIdAsync(id);
+            cache = _mapper.Map<CategoryReadDTO>(res);
+            await _cacheService.SetAsync(cacheKey, cache, null);
         }
-        return dto;
+        return cache;
+        //CategoryReadDTO dto = null;
+        //var res = await _repository.GetCategoryByIdAsync(id);
+        //if (res != null)
+        //{
+        //    dto = _mapper.Map<CategoryReadDTO>(res);
+        //}
+        //return dto;
     }
 
     public async Task<List<CategoryReadDTO>> GetParentsCategoryByIdAsync(CategoryReadDTO dto)

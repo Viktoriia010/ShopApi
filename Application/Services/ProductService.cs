@@ -49,12 +49,21 @@ public class ProductService(IProductRepository _repository, IMapper _mapper, ICa
 
     public async Task<ProductReadDTO?> GetProductByIdAsync(int id)
     {
-        var res = await _repository.GetProductByIdAsync(id);
-        if (res != null)
+        var cacheKey = $"Product_{id}";
+        var cache = await _cacheService.GetAsync<ProductReadDTO>(cacheKey);
+        if (cache == null)
         {
-            return _mapper.Map<ProductReadDTO>(res);
+            var res = await _repository.GetProductByIdAsync(id);
+            cache = _mapper.Map<ProductReadDTO>(res);
+            await _cacheService.SetAsync(cacheKey, cache, null);
         }
-        return null;
+        return cache;
+        //var res = await _repository.GetProductByIdAsync(id);
+        //if (res != null)
+        //{
+        //    return _mapper.Map<ProductReadDTO>(res);
+        //}
+        //return null;
     }
 
     public async Task<List<ProductReadDTO>?> GetProductsByCategoryAsync(int categoryId)
