@@ -5,6 +5,7 @@ using Shop.Application.Interfaces.Repository;
 using Shop.Application.Interfaces.Services;
 using ShopDomain.Models;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,11 +13,11 @@ using System.Threading.Tasks;
 
 namespace Shop.Application.Services;
 
-public class AuthService(IMapper _mapper, IAuthRepository _repository, IRefreshTokenRepository _refreshTokenRepository, IHashHelper _hashHelper, IJWTService _jwtService) : IAuthService
+public class AuthService(IMapper _mapper, IAuthRepository _repository, IRefreshTokenRepository _refreshTokenRepository, IHashHelper _hashHelper, IJWTService _jwtService, IQueueService _queue) : IAuthService
 {
     public async Task<(string? AccessToken, (string? RefreshToken, int ExpireDays) RefreshToken)> UserAuthenticationAsync(UserLoginDTO dto)
     {
-        var user = await _repository.IsExistUserAsync(dto.Email);
+        var user = await _repository.GetUserByEmailAsync(dto.Email);
         if (user == null)
         {
             return (null, (null, 0));
@@ -59,6 +60,7 @@ public class AuthService(IMapper _mapper, IAuthRepository _repository, IRefreshT
                     ExpiresAt = DateTime.UtcNow.AddDays(refreshToken.ExpireDays)
                 };
                 await _refreshTokenRepository.AddRefreshToken(refresh);
+                await _queue.PublishAsync("Users",  _mapper.Map<UserReadDTO>(registerUser) );
                 return (_mapper.Map<UserReadDTO>(registerUser), token, refreshToken);
             }
         }
@@ -81,4 +83,17 @@ public class AuthService(IMapper _mapper, IAuthRepository _repository, IRefreshT
         return accessToken;
     }
 
+    public async Task LogoutAsync(string refreshToken)
+    {
+        await _refreshTokenRepository.DeleteTokenAsync(refreshToken);
+    }
+
+    public async Task<UserReadDTO?> GetProfileAsync(string email)
+    {
+        var user = await _repository.GetUserByEmailAsync(email);
+        if(user == null) {
+            return null;
+        }
+        return _mapper.Map<UserReadDTO>(user);
+    }
 }
