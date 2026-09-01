@@ -24,13 +24,16 @@ public class AuthRepository(ShopDbContext _context) : IAuthRepository
             return false;
         return true;
     }
-    public async Task<User?> IsExistUserAsync(string email)
+    public async Task<User?> GetUserByEmailAsync(string email)
     {
         var userFromDb = await _context.Users.FirstOrDefaultAsync(user => user.Email == email);
         if (userFromDb == null)
             return null;
         return userFromDb;
     }
+
+
+
     public async Task<User?> RegisterUserAsync(User user, string hash)
     {
         user.PasswordHash = hash;

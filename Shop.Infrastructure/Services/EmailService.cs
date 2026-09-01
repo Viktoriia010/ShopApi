@@ -11,26 +11,20 @@ namespace Shop.Infrastructure.Services;
 
 public class EmailService : IEmailService
 {
-    public async Task SendPasswordResetEmailAsync(string email, string link)
+    public async Task SendEmailAsync(string email, string subject ,string body)
     {
         string fromEmail = "koshvikt10@gmail.com";
-        string password = "тут незвичайний пароль";
+        string password = "jair ljjt rays fvot";
 
         using var message = new MailMessage();
 
         message.From = new MailAddress(fromEmail);
         message.To.Add(email);
 
-        message.Subject = "Встановлення пароля";
+        message.Subject = subject;
 
         message.Body = $"""
-            Вас було додано до системи як адміністратора/модератора.
-
-            Для встановлення пароля перейдіть за посиланням:
-
-            {link}
-
-            Посилання дійсне протягом 30 хвилин.
+            {body}
             """;
 
         using var smtp = new SmtpClient("smtp.gmail.com", 587);
@@ -43,5 +37,37 @@ public class EmailService : IEmailService
 
         await smtp.SendMailAsync(message);
     }
+    //public async Task SendPasswordResetEmailAsync(string email, string link)
+    //{
+    //    string fromEmail = "koshvikt10@gmail.com";
+    //    string password = "jair ljjt rays fvot";
+
+    //    using var message = new MailMessage();
+
+    //    message.From = new MailAddress(fromEmail);
+    //    message.To.Add(email);
+
+    //    message.Subject = "Встановлення пароля";
+
+    //    message.Body = $"""
+    //        Вас було додано до системи як адміністратора/модератора.
+
+    //        Для встановлення пароля перейдіть за посиланням:
+
+    //        {link}
+
+    //        Посилання дійсне протягом 30 хвилин.
+    //        """;
+
+    //    using var smtp = new SmtpClient("smtp.gmail.com", 587);
+
+    //    smtp.Credentials = new NetworkCredential(
+    //        fromEmail,
+    //        password);
+
+    //    smtp.EnableSsl = true;
+
+    //    await smtp.SendMailAsync(message);
+    //}
 
 }

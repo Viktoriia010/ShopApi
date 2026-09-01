@@ -26,4 +26,18 @@ public class RefreshTokenRepository(ShopDbContext _context) : IRefreshTokenRepos
                 !x.IsRevoked &&
                 x.ExpiresAt > DateTime.UtcNow);
     }
+
+    public async Task DeleteTokenAsync(string refreshToken)
+    {
+        var token = await _context.RefreshTokens
+            .FirstOrDefaultAsync(x => x.Token == refreshToken);
+
+        if (token == null)
+            return;
+
+        token.IsRevoked = true;
+
+        await _context.SaveChangesAsync();
+    }
+
 }

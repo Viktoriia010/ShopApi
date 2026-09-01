@@ -13,4 +13,6 @@ public interface IAuthService
     Task<(UserReadDTO? User, string? Token, (string? RefreshToken, int ExpireDays) RefreshToken)> RegisterAsync(UserCreateDTO dto);
     Task<(string? AccessToken, (string? RefreshToken, int ExpireDays) RefreshToken)> UserAuthenticationAsync(UserLoginDTO dto);
     Task<string> RefreshTokenAsync(string refreshToken);
+    Task LogoutAsync(string refreshToken);
+    Task<UserReadDTO?> GetProfileAsync(string email);
 }

@@ -26,6 +26,7 @@ public class Product : BaseEntity
     [Required]
     [Column("category_id")]
     public int CategoryId { get; set; }
+
     [ForeignKey(nameof(CategoryId))]
     public Category Category { get; set; } = null!;
     // Navigation properties

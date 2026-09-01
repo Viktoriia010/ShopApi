@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Shop.Application.Interfaces.Services;
 
-public interface IEmailService
+public interface IQueueService
 {
-    Task SendEmailAsync(string email, string subject , string body);
+    Task PublishAsync<T>(string queue, T message);
 }

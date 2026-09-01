@@ -43,6 +43,7 @@ public class CategoryService(ICategoryRepository _repository, IMapper _mapper, I
 
         }
         return cache;
+        //var categories = await _repository.GetAllCategoriesAsync();
         //List<CategoryReadDTO> dtos = new List<CategoryReadDTO>();
         //if (categories != null && categories.Count > 0)
         //{

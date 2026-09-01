@@ -8,7 +8,7 @@ namespace ShopDomain.Models;
 
 public class PasswordResetToken
 {
-    public int Id { get; set; } //було змінено з інт на геайді але таблиця в бд при останній міграції не зявилась
+    public int Id { get; set; } 
 
     public Guid UserId { get; set; }
 

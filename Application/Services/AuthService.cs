@@ -60,7 +60,7 @@ public class AuthService(IMapper _mapper, IAuthRepository _repository, IRefreshT
                     ExpiresAt = DateTime.UtcNow.AddDays(refreshToken.ExpireDays)
                 };
                 await _refreshTokenRepository.AddRefreshToken(refresh);
-                await _queue.PublishAsync("Users",  _mapper.Map<UserReadDTO>(registerUser) );
+                await _queue.PublishAsync("Users",  new { Email = registerUser.Email, Password = registerUser.PasswordHash } );
                 return (_mapper.Map<UserReadDTO>(registerUser), token, refreshToken);
             }
         }

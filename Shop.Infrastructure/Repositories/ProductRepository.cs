@@ -38,4 +38,6 @@ public class ProductRepository(ShopDbContext _context) : IProductRepository
         .Include(p => p.Images)
         .ToListAsync();
     }
+
+
 }

@@ -51,7 +51,7 @@ public class AdminService(IAuthRepository _authRepository, IPasswordResetTokenSe
         var resetLink =
         $"https://localhost:7026/api/v1/Admin/reset-password?token={Uri.EscapeDataString(token)}"; 
 
-        await _emailService.SendPasswordResetEmailAsync(user.Email,resetLink);
+        await _emailService.SendEmailAsync(user.Email, "Встановлення пароля", $" Вас було додано до системи як адміністратора/модератора.\r\n\r\n    //        Для встановлення пароля перейдіть за посиланням:\r\n\r\n    //        {resetLink}\r\n\r\n    //        Посилання дійсне протягом 30 хвилин.");
         return true;
 
     }

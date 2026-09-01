@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Application.DTOs.UserDTOs;
 using Shop.Application.Interfaces.Services;
+using System.Security.Claims;
 
 namespace Shop.Api.Controllers;
 
@@ -59,5 +61,38 @@ public class AuthController(IAuthService _authService):ControllerBase
         {
             accessToken = result
         });
+    }
+
+    [Authorize]
+    [HttpGet("profile")]
+    public async Task<IActionResult> GetProfile()
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+
+        if (string.IsNullOrEmpty(email))
+            return Unauthorized();
+
+        var profile = await _authService.GetProfileAsync(email);
+
+        if (profile == null)
+            return NotFound("Користувача не знайдено");
+
+        return Ok(profile);
+    }
+
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        var refreshToken = Request.Cookies["refreshToken"];
+
+        if (string.IsNullOrEmpty(refreshToken))
+            return Ok();
+
+        await _authService.LogoutAsync(refreshToken);
+
+        Response.Cookies.Delete("refreshToken");
+
+        return Ok();
     }
 }

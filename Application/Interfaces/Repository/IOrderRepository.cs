@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Shop.Application.Interfaces.Repository;
 
-public interface IRefreshTokenRepository
+public interface IOrderRepository
 {
-    Task AddRefreshToken(RefreshToken token);
-    Task<RefreshToken?> GetValidRefreshTokenAsync(string token);
-    Task DeleteTokenAsync(string refreshToken);
+    public Task AddOrderAsync(Orders order, List<OrderDetails> orders);
+    public Task UpdateOrder(Orders updated);
+    Task<Orders?> GetOrderByIdAsync(Guid id);
 }
