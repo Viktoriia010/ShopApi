@@ -39,5 +39,18 @@ public class ProductRepository(ShopDbContext _context) : IProductRepository
         .ToListAsync();
     }
 
+    public async Task<Product?> DeleteProductByIdAsync(int id)
+    {
+        var product = await _context.Products.Include(x => x.Images)
+        .FirstOrDefaultAsync(x => x.Id == id);
+        if (product == null)
+        {
+            return null;
+        }
+        product.IsActive = false;
+        await _context.SaveChangesAsync();
+        return product;
+    }
+
 
 }

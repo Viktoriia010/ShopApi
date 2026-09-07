@@ -1,15 +1,21 @@
 ﻿
 using AutoMapper;
 using Azure.Core;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shop.Api.Filters;
 using Shop.Api.Interfaces;
 using Shop.Api.Requests.Categories;
 using Shop.Api.Requests.Products;
+using Shop.Application.Commands.Product;
 using Shop.Application.DTOs.CategoryDTOs;
 using Shop.Application.DTOs.ProductDTOs;
+using Shop.Application.DTOs.ProductFeedbackDTOs;
 using Shop.Application.DTOs.ProductImageDTOs;
+using Shop.Application.Interfaces.Services;
+using Shop.Application.Queries.Product;
+using Shop.Infrastructure.Services;
 using ShopDomain.Models;
 
 namespace Shop.Api.Controllers;
@@ -17,7 +23,7 @@ namespace Shop.Api.Controllers;
 [ApiController]
 [Route("api/v1/[controller]")]
 [LogActionFilter]
-public class ProductsController(IProductService _productService, IImageService _imageService, IConfiguration _configuration) : ControllerBase
+public class ProductsController(IProductService _productService, IImageService _imageService, IConfiguration _configuration, IMongoDbService _mongoDbService, IMediator _mediator) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> CreateProduct([FromForm] ProductCreateRequest dto)
@@ -63,7 +69,8 @@ public class ProductsController(IProductService _productService, IImageService _
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetProductById([FromRoute] int id)
     {
-        var product = await _productService.GetProductByIdAsync(id);
+        var product = await _mediator.Send(new GetProductByIdQuery(id));
+        //var product = await _productService.GetProductByIdAsync(id);
         if (product == null)
         {
             return NotFound();
@@ -78,48 +85,16 @@ public class ProductsController(IProductService _productService, IImageService _
         return Ok(products);
     }
 
-    //private readonly IProductService _productService;
+    [HttpPost("{productId}/feedback")]
+    public async Task<IActionResult> ProductFeedback([FromBody] ProductFeedbackDTO feedback,int productId)
+    {
+        feedback.ProductId = productId;
 
-    //public ProductController(IProductService productService)
-    //{
-    //    _productService = productService;
-    //}
-    //[HttpGet]
-    //public List<Product> GetProducts()
-    //{
-    //    return _productService.GetAllProducts();
-    //}
-    //[HttpGet("{id}")]
-    //public IActionResult GetProductById([FromRoute] int id)
-    //{
-    //    var product = new Product()
-    //    {
-    //        Name = $"Test Product {id}",
-    //        Price = 100
-    //    };
-    //    return Ok(product);
-    //}
+        await _mongoDbService.AddFeedbackAsync(feedback);
 
-    //[HttpGet("{id:int}")]
-    //public IActionResult GetProductById([FromRoute] int id)
-    //{
-    //    var product = _productService.GetProductById(id);
-    //    if (product == null) {
-    //        return NotFound("Product not found");
-    //    }
-    //    return Ok(product);
-    //}
+        return Ok(feedback);
+    }
 
-    //[HttpPost]
-    //public IActionResult AddNewProduct([FromBody] Product product)
-    //{
-    //    if(product == null)
-    //    {
-    //        return BadRequest();
-    //    }
-    //    _productService.AddProduct(product);
-    //    return CreatedAtAction(nameof(GetProductById),  new{ id = product.Id }, product);
-    //}
     //[HttpPut("{id:int}")]
     //public IActionResult UpdateProductById([FromRoute] int id, [FromBody] Product updatedProduct)
     //{
@@ -133,17 +108,18 @@ public class ProductsController(IProductService _productService, IImageService _
     //            }
     //    return Ok(product);
     //}
-    //[HttpDelete("{id:int}")]
-    //public IActionResult DeleteProductById([FromRoute] int id)
-    //{
-    //    bool res =_productService.DeleteProductById(id);
-    //    if (res)
-    //    {
-    //        return NoContent();
-    //    }
-    //    return NotFound();
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeleteProductById([FromRoute] int id)
+    {
+        var res = await _mediator.Send(new DeleteProductByIdCommand(id));
+        //bool res = _productService.DeleteProductById(id);
+        if (res == null)
+        {
+            return NotFound();
+        }
+        return Ok(res);
 
-    //}
+    }
     //[HttpGet("search")]
     //public IActionResult SearchProductByName([FromQuery] string title)
     //{

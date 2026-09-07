@@ -13,4 +13,5 @@ public interface IProductRepository
     Task<int> AddProductAsync(Product product);
     Task<Product>? GetProductByIdAsync(int id);
     Task<List<Product>?> GetProductsByCategoryAsync(int categoryId);
+    Task<Product?> DeleteProductByIdAsync(int id);
 }

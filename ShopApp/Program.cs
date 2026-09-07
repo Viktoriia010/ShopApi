@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using RabbitMQ.Client;
 using Shop.Api.Interfaces;
 using Shop.Api.Middleware;
 using Shop.Api.Services;
@@ -11,6 +12,7 @@ using Shop.Application.Interfaces.Helpers;
 using Shop.Application.Interfaces.Repository;
 using Shop.Application.Interfaces.Services;
 using Shop.Application.Mapping;
+using Shop.Application.Queries.Product;
 using Shop.Application.Services;
 using Shop.Infrastructure.Configuration;
 using Shop.Infrastructure.Data;
@@ -33,6 +35,7 @@ public class Program
 {
     public static void Main(string[] args)
     {
+  
         var builder = WebApplication.CreateBuilder(args);
         builder.Services.AddDbContext<ShopDbContext>(options =>
         {
@@ -47,7 +50,16 @@ public class Program
         //Реєстрація налаштувань в DI, можемо їх читати будь-де
         builder.Services.Configure<JwtSettings>(
         configuration.GetSection("Jwt"));
-
+        //=================== RabitMq ===================
+        builder.Services.Configure<RabbitMqSettings>(
+            builder.Configuration.GetSection("RabbitMq")
+        );
+        builder.Services.AddHostedService<RabbitMqReaderService>();
+        //==================MEDIATR======================
+        builder.Services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(GetProductByIdHandler).Assembly);
+        });
         // ================= AutoMapper =================
         builder.Services.AddAutoMapper(
             _ => { },typeof(CategoryProfile).Assembly,typeof(ProductProfile).Assembly,
@@ -57,13 +69,25 @@ public class Program
         // ================= CORS =================
         builder.Services.AddCors(options =>
         {
-            options.AddPolicy("AllowAll", policy =>
+            options.AddPolicy("AllowFrontend", policy =>
             {
-                policy.AllowAnyOrigin()
+                policy.WithOrigins("http://localhost:5173") 
+                      .AllowAnyHeader()
                       .AllowAnyMethod()
-                      .AllowAnyHeader();
+                      .AllowCredentials(); 
             });
         });
+
+        
+        //builder.Services.AddCors(options =>
+        //{
+        //    options.AddPolicy("AllowAll", policy =>
+        //    {
+        //        policy.AllowAnyOrigin()
+        //              .AllowAnyMethod()
+        //              .AllowAnyHeader();
+        //    });
+        //});
 
         //builder.Services.AddCors(options =>
         //{
@@ -131,12 +155,19 @@ public class Program
         builder.Services.AddScoped<IAdminService, AdminService>();
         builder.Services.AddScoped<IPasswordResetTokenService, PasswordResetTokenService>();
         builder.Services.AddScoped<IEmailService, EmailService>();
+        builder.Services.AddScoped<IQueueService, RabbitMqService>();
+        builder.Services.AddScoped<IOrderService, OrderService>();
+        builder.Services.AddScoped<IOrderProcessingService, OrderProcessingService>();
+        builder.Services.AddScoped<IMongoDbService, MongoDbService>();
+        builder.Services.AddHostedService<RabbitMqOrderReaderService>();
+
         //------------------HELPERS-------------
         builder.Services.AddSingleton<IHashHelper, HashHelper>();
         //------------------REPOSITORIES-------------
         builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
         builder.Services.AddScoped<IProductRepository, ProductRepository>();
         builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+        builder.Services.AddScoped<IOrderRepository, OrderRepository>();
         builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         builder.Services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
 
@@ -186,6 +217,7 @@ public class Program
         app.UseSwagger();
         app.UseSwaggerUI();
         app.UseCors("AllowAll");
+        app.UseCors("AllowFrontend");
         //app.UseCors("ProductionPolicy");
         // Configure the HTTP request pipeline.
         //if (app.Environment.IsDevelopment())
