@@ -86,7 +86,7 @@ public class ProductsController(IProductService _productService, IImageService _
     }
 
     [HttpPost("{productId}/feedback")]
-    public async Task<IActionResult> ProductFeedback([FromBody] ProductFeedbackDTO feedback,int productId)
+    public async Task<IActionResult> AddProductFeedback([FromBody] ProductFeedbackDTO feedback,int productId)
     {
         feedback.ProductId = productId;
 
