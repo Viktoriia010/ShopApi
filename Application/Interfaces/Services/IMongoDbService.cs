@@ -9,5 +9,5 @@ namespace Shop.Application.Interfaces.Services;
 
 public interface IMongoDbService
 {
-    Task AddFeedbackAsync(ProductFeedbackDTO feedback);
+    Task AddFeedbackAsync(ProductFeedbackDTO feedback, CancellationToken cancellationToken);
 }

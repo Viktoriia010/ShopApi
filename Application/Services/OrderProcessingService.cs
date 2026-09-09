@@ -13,13 +13,13 @@ namespace Shop.Application.Services;
 
 public class OrderProcessingService(IProductRepository _productRepository, IOrderRepository _orderRepository, IEmailService _emailService) : IOrderProcessingService
 {
-    public async Task ProcessAsync(OrderResponseDTO message)
+    public async Task ProcessAsync(OrderResponseDTO message, CancellationToken cancellationToken)
     {
         var products = new List<Product>();
 
         foreach (var item in message.Items)
         {
-            var product = await _productRepository.GetProductByIdAsync(item.ProductId);
+            var product = await _productRepository.GetProductByIdAsync(item.ProductId, cancellationToken);
 
             if (product == null)
             {
@@ -28,14 +28,14 @@ public class OrderProcessingService(IProductRepository _productRepository, IOrde
 
             if (product.StockQty < item.Count)
             {
-                var res = await _orderRepository.GetOrderByIdAsync(message.Id);
+                var res = await _orderRepository.GetOrderByIdAsync(message.Id, cancellationToken);
                 if (res == null)
                 {
                     throw new Exception("Замовлення не знайдено");
                 }
                 res.Status = OrderStatus.Waiting;
-                await _orderRepository.UpdateOrder(res);
-                await _emailService.SendEmailAsync(message.Email, "Замовлення", $"На жаль, наразі товару недостатньо на складі.\r\nВаше замовлення очікує поповнення складу.");
+                await _orderRepository.UpdateOrder(res, cancellationToken);
+                await _emailService.SendEmailAsync(message.Email, "Замовлення", $"На жаль, наразі товару недостатньо на складі.\r\nВаше замовлення очікує поповнення складу.", cancellationToken);
 
                 return;
             }
@@ -53,15 +53,15 @@ public class OrderProcessingService(IProductRepository _productRepository, IOrde
             price += (item.Count * item.Price);
         }
 
-        var order = await _orderRepository.GetOrderByIdAsync(message.Id);
+        var order = await _orderRepository.GetOrderByIdAsync(message.Id, cancellationToken);
 
         if (order == null)
         {
             throw new Exception("Замовлення не знайдено");
         }
         order.Status = OrderStatus.Processing;
-        await _orderRepository.UpdateOrder(order);
+        await _orderRepository.UpdateOrder(order, cancellationToken);
 
-        await _emailService.SendEmailAsync(message.Email, "Замовлення", $"{mess}\r\n\r\nЗагальна сума: {price}");
+        await _emailService.SendEmailAsync(message.Email, "Замовлення", $"{mess}\r\n\r\nЗагальна сума: {price}", cancellationToken);
     }
 }

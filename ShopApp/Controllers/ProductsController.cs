@@ -26,7 +26,7 @@ namespace Shop.Api.Controllers;
 public class ProductsController(IProductService _productService, IImageService _imageService, IConfiguration _configuration, IMongoDbService _mongoDbService, IMediator _mediator) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> CreateProduct([FromForm] ProductCreateRequest dto)
+    public async Task<IActionResult> CreateProduct([FromForm] ProductCreateRequest dto, CancellationToken cancellationToken)
     {
 
         var imageUrls = new List<string>(); 
@@ -36,7 +36,8 @@ public class ProductsController(IProductService _productService, IImageService _
             {
                 var fileName = await _imageService.SaveFileAsync(
                     image,
-                    _configuration["DirnameForFiles:Products"]!
+                    _configuration["DirnameForFiles:Products"]!,
+                    cancellationToken
                 );
 
                 imageUrls.Add(fileName);
@@ -52,7 +53,7 @@ public class ProductsController(IProductService _productService, IImageService _
                 ImagesUrl = imageUrls
 
             };
-        var id = await _productService.CreateProductAsync(createDto);
+        var id = await _productService.CreateProductAsync(createDto, cancellationToken);
         return CreatedAtAction(
                     nameof(GetProductById), // назва методу
                     new { id },              // параметри маршруту
@@ -61,13 +62,13 @@ public class ProductsController(IProductService _productService, IImageService _
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllProducts()
+    public async Task<IActionResult> GetAllProducts(CancellationToken cancellationToken)
     {
-        var products = await _productService.GetAllProductsAsync();
+        var products = await _productService.GetAllProductsAsync(cancellationToken);
         return Ok(products);
     }
     [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetProductById([FromRoute] int id)
+    public async Task<IActionResult> GetProductById([FromRoute] int id, CancellationToken cancellationToken)
     {
         var product = await _mediator.Send(new GetProductByIdQuery(id));
         //var product = await _productService.GetProductByIdAsync(id);
@@ -79,18 +80,18 @@ public class ProductsController(IProductService _productService, IImageService _
     }
 
     [HttpGet("category/{categoryId}")]
-    public async Task<IActionResult> GetProductsByCategory(int categoryId)
+    public async Task<IActionResult> GetProductsByCategory(int categoryId, CancellationToken cancellationToken)
     {
-        var products = await _productService.GetProductsByCategoryAsync(categoryId);
+        var products = await _productService.GetProductsByCategoryAsync(categoryId, cancellationToken);
         return Ok(products);
     }
 
     [HttpPost("{productId}/feedback")]
-    public async Task<IActionResult> AddProductFeedback([FromBody] ProductFeedbackDTO feedback,int productId)
+    public async Task<IActionResult> AddProductFeedback([FromBody] ProductFeedbackDTO feedback,int productId, CancellationToken cancellationToken)
     {
         feedback.ProductId = productId;
 
-        await _mongoDbService.AddFeedbackAsync(feedback);
+        await _mongoDbService.AddFeedbackAsync(feedback, cancellationToken);
 
         return Ok(feedback);
     }
@@ -109,7 +110,7 @@ public class ProductsController(IProductService _productService, IImageService _
     //    return Ok(product);
     //}
     [HttpDelete("{id:int}")]
-    public async Task<IActionResult> DeleteProductById([FromRoute] int id)
+    public async Task<IActionResult> DeleteProductById([FromRoute] int id, CancellationToken cancellationToken)
     {
         var res = await _mediator.Send(new DeleteProductByIdCommand(id));
         //bool res = _productService.DeleteProductById(id);

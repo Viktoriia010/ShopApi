@@ -9,6 +9,6 @@ namespace Shop.Application.Interfaces.Services;
 
 public interface IAdminService
 {
-    Task<bool> CreateStaffAsync(CreateStaffDTO dto);
-    Task<bool> ResetPasswordAsync(ResetPasswordDTO dto);
+    Task<bool> CreateStaffAsync(CreateStaffDTO dto, CancellationToken cancellationToken);
+    Task<bool> ResetPasswordAsync(ResetPasswordDTO dto, CancellationToken cancellationToken);
 }

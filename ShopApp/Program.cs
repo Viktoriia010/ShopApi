@@ -218,6 +218,8 @@ public class Program
         app.UseSwaggerUI();
         app.UseCors("AllowAll");
         app.UseCors("AllowFrontend");
+        app.UseMiddleware<CancellationTokenHandleMiddleware>();
+
         //app.UseCors("ProductionPolicy");
         // Configure the HTTP request pipeline.
         //if (app.Environment.IsDevelopment())

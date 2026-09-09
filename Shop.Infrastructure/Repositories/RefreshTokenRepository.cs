@@ -12,32 +12,32 @@ namespace Shop.Infrastructure.Repositories;
 
 public class RefreshTokenRepository(ShopDbContext _context) : IRefreshTokenRepository
 {
-    public async Task AddRefreshToken(RefreshToken token)
+    public async Task AddRefreshToken(RefreshToken token, CancellationToken cancellationToken)
     {
-        await _context.RefreshTokens.AddAsync(token);
-        await _context.SaveChangesAsync();
+        await _context.RefreshTokens.AddAsync(token, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
-    public async Task<RefreshToken?> GetValidRefreshTokenAsync(string token)
+    public async Task<RefreshToken?> GetValidRefreshTokenAsync(string token, CancellationToken cancellationToken)
     {
         return await _context.RefreshTokens
             .Include(x => x.User)
             .FirstOrDefaultAsync(x =>
                 x.Token == token &&
                 !x.IsRevoked &&
-                x.ExpiresAt > DateTime.UtcNow);
+                x.ExpiresAt > DateTime.UtcNow, cancellationToken);
     }
 
-    public async Task DeleteTokenAsync(string refreshToken)
+    public async Task DeleteTokenAsync(string refreshToken, CancellationToken cancellationToken)
     {
         var token = await _context.RefreshTokens
-            .FirstOrDefaultAsync(x => x.Token == refreshToken);
+            .FirstOrDefaultAsync(x => x.Token == refreshToken, cancellationToken);
 
         if (token == null)
             return;
 
         token.IsRevoked = true;
 
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
 }

@@ -5,7 +5,7 @@ namespace Shop.Api.Services;
 public class ImageService(IWebHostEnvironment _environment) : IImageService
 {
     //private static string _dirname = "categories";
-    public async Task<string> SaveFileAsync(IFormFile file, string dirname)
+    public async Task<string> SaveFileAsync(IFormFile file, string dirname, CancellationToken cancellationToken)
     {
         if (file == null || file.Length == 0)
             throw new ArgumentException("File is empty.");
@@ -15,7 +15,7 @@ public class ImageService(IWebHostEnvironment _environment) : IImageService
         var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
         var filePath = Path.Combine(folderPath, fileName);
         await using var stream = new FileStream(filePath, FileMode.Create);
-        await file.CopyToAsync(stream);
+        await file.CopyToAsync(stream, cancellationToken);
         return fileName;
     }
 }

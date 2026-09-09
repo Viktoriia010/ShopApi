@@ -15,7 +15,7 @@ public class DeleteProductByIdHandler(IMapper _mapper, IProductRepository _repos
 {
     public async Task<ProductReadDTO?> Handle(DeleteProductByIdCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _repository.DeleteProductByIdAsync(request.id);
+        var entity = await _repository.DeleteProductByIdAsync(request.id, cancellationToken);
         if (entity == null)
             return null;
         return _mapper.Map<ProductReadDTO?>(entity);

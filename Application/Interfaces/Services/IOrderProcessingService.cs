@@ -10,5 +10,5 @@ namespace Shop.Application.Interfaces.Services;
 public interface IOrderProcessingService
 {
 
-    Task ProcessAsync(OrderResponseDTO message);
+    Task ProcessAsync(OrderResponseDTO message, CancellationToken cancellationToken);
 }

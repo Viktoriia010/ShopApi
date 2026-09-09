@@ -9,7 +9,7 @@ namespace Shop.Application.Interfaces.Repository;
 
 public interface IPasswordResetTokenRepository
 {
-    Task AddAsync(PasswordResetToken token);
-    Task<PasswordResetToken?> GetByTokenHashAsync(string tokenHash);
-    Task UpdateAsync(PasswordResetToken token);
+    Task AddAsync(PasswordResetToken token, CancellationToken cancellationToken);
+    Task<PasswordResetToken?> GetByTokenHashAsync(string tokenHash, CancellationToken cancellationToken);
+    Task UpdateAsync(PasswordResetToken token, CancellationToken cancellationToken);
 }

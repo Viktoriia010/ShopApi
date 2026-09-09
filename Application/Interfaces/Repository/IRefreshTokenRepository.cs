@@ -9,7 +9,7 @@ namespace Shop.Application.Interfaces.Repository;
 
 public interface IRefreshTokenRepository
 {
-    Task AddRefreshToken(RefreshToken token);
-    Task<RefreshToken?> GetValidRefreshTokenAsync(string token);
-    Task DeleteTokenAsync(string refreshToken);
+    Task AddRefreshToken(RefreshToken token, CancellationToken cancellationToken);
+    Task<RefreshToken?> GetValidRefreshTokenAsync(string token , CancellationToken cancellationToken);
+    Task DeleteTokenAsync(string refreshToken, CancellationToken cancellationToken);
 }

@@ -16,10 +16,10 @@ namespace Shop.Application.Services;
 
 public class AdminService(IAuthRepository _authRepository, IPasswordResetTokenService _passwordResetTokenService, IHashHelper _hashHelper, IPasswordResetTokenRepository _passwordResetTokenRepository, IEmailService _emailService) : IAdminService
 {
-    public async Task<bool> CreateStaffAsync(CreateStaffDTO dto)
+    public async Task<bool> CreateStaffAsync(CreateStaffDTO dto, CancellationToken cancellationToken)
     {
    
-        if(await _authRepository.IsExistEmailAsync(dto.Email))
+        if(await _authRepository.IsExistEmailAsync(dto.Email, cancellationToken))
         {
             return false;
         }
@@ -36,7 +36,7 @@ public class AdminService(IAuthRepository _authRepository, IPasswordResetTokenSe
             PasswordHash = string.Empty
         };
 
-        await _authRepository.AddUserAsync(user);
+        await _authRepository.AddUserAsync(user, cancellationToken);
         var token = _passwordResetTokenService.GeneratePasswordResetToken();
         var tokenHash = _passwordResetTokenService.HashToken(token);
 
@@ -47,18 +47,18 @@ public class AdminService(IAuthRepository _authRepository, IPasswordResetTokenSe
             ExpiresAt = DateTime.Now.AddMinutes(30),
             IsUsed = false
         };
-        await _passwordResetTokenRepository.AddAsync(resetToken);
+        await _passwordResetTokenRepository.AddAsync(resetToken, cancellationToken);
         var resetLink =
         $"https://localhost:7026/api/v1/Admin/reset-password?token={Uri.EscapeDataString(token)}"; 
 
-        await _emailService.SendEmailAsync(user.Email, "Встановлення пароля", $" Вас було додано до системи як адміністратора/модератора.\r\n\r\n    //        Для встановлення пароля перейдіть за посиланням:\r\n\r\n    //        {resetLink}\r\n\r\n    //        Посилання дійсне протягом 30 хвилин.");
+        await _emailService.SendEmailAsync(user.Email, "Встановлення пароля", $" Вас було додано до системи як адміністратора/модератора.\r\n\r\n    //        Для встановлення пароля перейдіть за посиланням:\r\n\r\n    //        {resetLink}\r\n\r\n    //        Посилання дійсне протягом 30 хвилин.", cancellationToken);
         return true;
 
     }
-    public async Task<bool> ResetPasswordAsync(ResetPasswordDTO dto)
+    public async Task<bool> ResetPasswordAsync(ResetPasswordDTO dto, CancellationToken cancellationToken)
     {
         var tokenHash = _passwordResetTokenService.HashToken(dto.Token); 
-        var resetToken = await _passwordResetTokenRepository.GetByTokenHashAsync(tokenHash);
+        var resetToken = await _passwordResetTokenRepository.GetByTokenHashAsync(tokenHash, cancellationToken);
 
         if (resetToken == null)
         {
@@ -80,9 +80,9 @@ public class AdminService(IAuthRepository _authRepository, IPasswordResetTokenSe
 
         resetToken.IsUsed = true;
 
-        await _authRepository.UpdateUserAsync(user);
+        await _authRepository.UpdateUserAsync(user, cancellationToken);
 
-        await _passwordResetTokenRepository.UpdateAsync(resetToken);
+        await _passwordResetTokenRepository.UpdateAsync(resetToken, cancellationToken);
 
         return true;
     }

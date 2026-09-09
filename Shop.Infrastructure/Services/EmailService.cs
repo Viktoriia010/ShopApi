@@ -11,7 +11,7 @@ namespace Shop.Infrastructure.Services;
 
 public class EmailService : IEmailService
 {
-    public async Task SendEmailAsync(string email, string subject ,string body)
+    public async Task SendEmailAsync(string email, string subject ,string body, CancellationToken cancellationToken)
     {
         string fromEmail = "koshvikt10@gmail.com";
         string password = "jair ljjt rays fvot";
@@ -35,7 +35,7 @@ public class EmailService : IEmailService
 
         smtp.EnableSsl = true;
 
-        await smtp.SendMailAsync(message);
+        await smtp.SendMailAsync(message, cancellationToken);
     }
     //public async Task SendPasswordResetEmailAsync(string email, string link)
     //{

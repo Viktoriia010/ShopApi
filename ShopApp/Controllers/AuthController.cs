@@ -12,9 +12,9 @@ namespace Shop.Api.Controllers;
 public class AuthController(IAuthService _authService):ControllerBase
 {
     [HttpPost("register")]
-    public async Task<IActionResult> RegisterUser([FromBody] UserCreateDTO dto)
+    public async Task<IActionResult> RegisterUser([FromBody] UserCreateDTO dto, CancellationToken cancellationToken)
     {
-        var user = await _authService.RegisterAsync(dto);
+        var user = await _authService.RegisterAsync(dto, cancellationToken);
         if (user.User == null || user.Token == null|| user.RefreshToken.RefreshToken == null)
             return BadRequest("Користувач за таким email вже існує");
 
@@ -28,9 +28,9 @@ public class AuthController(IAuthService _authService):ControllerBase
         return Ok(new { user = user.User, token = user.Token, refreshToken = user.RefreshToken.RefreshToken });
     }
     [HttpPost("authentication")]
-    public async Task<IActionResult> UserAuthentication([FromBody] UserLoginDTO dto)
+    public async Task<IActionResult> UserAuthentication([FromBody] UserLoginDTO dto, CancellationToken cancellationToken)
     {
-        var token = await _authService.UserAuthenticationAsync(dto);
+        var token = await _authService.UserAuthenticationAsync(dto, cancellationToken);
         if (token.AccessToken == null || token.RefreshToken.RefreshToken == null)
         {
             return Unauthorized("Невірний email чи пароль");
@@ -45,13 +45,13 @@ public class AuthController(IAuthService _authService):ControllerBase
         return Ok(new { token.AccessToken , token.RefreshToken.RefreshToken });
     }
     [HttpPost("refresh")]
-    public async Task<IActionResult> GetRefreshToken()
+    public async Task<IActionResult> GetRefreshToken(CancellationToken cancellationToken)
     {
         var refreshToken = Request.Cookies["refreshToken"];
         if (string.IsNullOrEmpty(refreshToken))
             return Unauthorized();
 
-        var result = await _authService.RefreshTokenAsync(refreshToken);
+        var result = await _authService.RefreshTokenAsync(refreshToken, cancellationToken);
 
 
         if (result == null)
@@ -65,14 +65,14 @@ public class AuthController(IAuthService _authService):ControllerBase
 
     [Authorize]
     [HttpGet("profile")]
-    public async Task<IActionResult> GetProfile()
+    public async Task<IActionResult> GetProfile(CancellationToken cancellationToken)
     {
         var email = User.FindFirstValue(ClaimTypes.Email);
 
         if (string.IsNullOrEmpty(email))
             return Unauthorized();
 
-        var profile = await _authService.GetProfileAsync(email);
+        var profile = await _authService.GetProfileAsync(email, cancellationToken);
 
         if (profile == null)
             return NotFound("Користувача не знайдено");
@@ -82,14 +82,14 @@ public class AuthController(IAuthService _authService):ControllerBase
 
     [Authorize]
     [HttpPost("logout")]
-    public async Task<IActionResult> Logout()
+    public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
         var refreshToken = Request.Cookies["refreshToken"];
 
         if (string.IsNullOrEmpty(refreshToken))
             return Ok();
 
-        await _authService.LogoutAsync(refreshToken);
+        await _authService.LogoutAsync(refreshToken, cancellationToken);
 
         Response.Cookies.Delete("refreshToken");
 

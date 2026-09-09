@@ -28,7 +28,7 @@ public class MongoDbService : IMongoDbService
 
         _collection = database.GetCollection<ProductFeedback>("ProductFeedback");
     }
-    public async Task AddFeedbackAsync(ProductFeedbackDTO feedback)
+    public async Task AddFeedbackAsync(ProductFeedbackDTO feedback, CancellationToken cancellationToken)
     {
         var productFeedback = new ProductFeedback
         {
@@ -39,7 +39,7 @@ public class MongoDbService : IMongoDbService
             Rating = feedback.Rating
         };
 
-        await _collection.InsertOneAsync(productFeedback);
+        await _collection.InsertOneAsync(productFeedback, cancellationToken);
    
     }
 

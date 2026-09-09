@@ -48,7 +48,7 @@ namespace Shop.Api.Services;
                 Port = _rabbitMqSettings.Port
             };
 
-            _connection = await factory.CreateConnectionAsync();
+            _connection = await factory.CreateConnectionAsync(stoppingToken);
             _channel = await _connection.CreateChannelAsync();
 
             var consumer = new AsyncEventingBasicConsumer(_channel);
@@ -76,7 +76,7 @@ namespace Shop.Api.Services;
                 var orderProcessingService =
                     scope.ServiceProvider.GetRequiredService<IOrderProcessingService>();
 
-                await orderProcessingService.ProcessAsync(message);
+                await orderProcessingService.ProcessAsync(message, stoppingToken);
 
             };
 

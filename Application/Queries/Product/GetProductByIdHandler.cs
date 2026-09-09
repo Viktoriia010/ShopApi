@@ -14,7 +14,7 @@ public class GetProductByIdHandler(IMapper _mapper, IProductRepository _reposito
 {
     public async Task<ProductReadDTO?> Handle(GetProductByIdQuery request, CancellationToken cancellationToken)
     {
-        var entity = await _repository.GetProductByIdAsync(request.id);
+        var entity = await _repository.GetProductByIdAsync(request.id, cancellationToken);
         if (entity == null)
             return null;
         return _mapper.Map<ProductReadDTO?>(entity);

@@ -22,7 +22,7 @@ public class RabbitMqService : IQueueService
     }
 
     // Метод для відправки повідомлення у чергу
-    public async Task PublishAsync<T>(string queue, T message)
+    public async Task PublishAsync<T>(string queue, T message, CancellationToken cancellationToken)
     {
         // Створюємо фабрику підключення до RabbitMQ
         var factory = new ConnectionFactory()
@@ -35,7 +35,7 @@ public class RabbitMqService : IQueueService
         };
 
         // Створюємо з'єднання з RabbitMQ сервером
-        await using var connection = await factory.CreateConnectionAsync();
+        await using var connection = await factory.CreateConnectionAsync(cancellationToken);
 
         // Створюємо канал (channel) для роботи з чергами
         await using var channel = await connection.CreateChannelAsync();
@@ -47,7 +47,7 @@ public class RabbitMqService : IQueueService
             durable: true,         // черга зберігається після перезапуску RabbitMQ
             exclusive: false,      // доступна для інших з'єднань
             autoDelete: false,     // не видаляється автоматично
-            arguments: null        // додаткові параметри
+            arguments: null       // додаткові параметри
         );
 
         // Серіалізуємо повідомлення у JSON
@@ -70,7 +70,8 @@ public class RabbitMqService : IQueueService
              routingKey: queue,   // назва черги (routing key)
              mandatory: false,    // якщо черга не знайдена — повідомлення просто ігнорується
              basicProperties: properties,
-             body: body           // тіло повідомлення
+             body: body,           // тіло повідомлення,
+             cancellationToken
         );
     }
 }

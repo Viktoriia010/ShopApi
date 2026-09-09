@@ -13,9 +13,9 @@ namespace Shop.Application.Services;
 
 public class OrderService(IAuthRepository _authRepository, IOrderRepository _orderRepository, IProductRepository _productRepository) : IOrderService
 {
-    public async Task<OrderResponseDTO> CreateOrderAsync(string email, OrderCreateDTO dto)
+    public async Task<OrderResponseDTO> CreateOrderAsync(string email, OrderCreateDTO dto, CancellationToken cancellationToken)
     {
-        var user = await _authRepository.GetUserByEmailAsync(email);
+        var user = await _authRepository.GetUserByEmailAsync(email, cancellationToken);
         if (user == null)
         {
             throw new Exception("Користувача не найдено");
@@ -28,12 +28,11 @@ public class OrderService(IAuthRepository _authRepository, IOrderRepository _ord
         {
             UserId = user.Id,
             Status = OrderStatus.Pending,
-            Paid = dto.Paid
         };
         List<OrderDetails> orders = new List<OrderDetails>();
         foreach (var item in dto.Items)
         {
-            var product = await _productRepository.GetProductByIdAsync(item.ProductId);
+            var product = await _productRepository.GetProductByIdAsync(item.ProductId, cancellationToken);
             if (product == null)
             {
                 throw new Exception("Продукт не найдено");
@@ -47,7 +46,7 @@ public class OrderService(IAuthRepository _authRepository, IOrderRepository _ord
             };
             orders.Add(orderDetails);
         }
-        await _orderRepository.AddOrderAsync(order, orders);
+        await _orderRepository.AddOrderAsync(order, orders, cancellationToken);
         var response = new OrderResponseDTO
         {
             Id = order.Id,

@@ -40,7 +40,7 @@ public class RabbitMqReaderService : BackgroundService
             Port = _rabbitMqSettings.Port
         };
 
-        _connection = await factory.CreateConnectionAsync();
+        _connection = await factory.CreateConnectionAsync(stoppingToken);
         _channel = await _connection.CreateChannelAsync();
 
         var consumer = new AsyncEventingBasicConsumer(_channel);
@@ -70,7 +70,8 @@ public class RabbitMqReaderService : BackgroundService
         await _channel.BasicConsumeAsync(
             queue: "Users",
             autoAck: true,
-            consumer: consumer);
+            consumer: consumer,
+            stoppingToken);
 
         _logger.LogInformation(
             "RabbitMQ Reader started. Waiting messages...");
@@ -88,10 +89,10 @@ public class RabbitMqReaderService : BackgroundService
             "RabbitMQ Reader stopping...");
 
         if (_channel != null)
-            await _channel.CloseAsync();
+            await _channel.CloseAsync(cancellationToken);
 
         if (_connection != null)
-            await _connection.CloseAsync();
+            await _connection.CloseAsync(cancellationToken);
 
         await base.StopAsync(cancellationToken);
     }

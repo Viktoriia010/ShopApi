@@ -18,11 +18,11 @@ public class CategoryController(ICategoryService _categoryService, IImageService
 
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> CreateCategory([FromForm] CategoryCreateRequest dto)
+    public async Task<IActionResult> CreateCategory([FromForm] CategoryCreateRequest dto, CancellationToken cancellationToken)
     {
         if (dto.Image != null)
         {
-            dto.Url = (await _imageService.SaveFileAsync(dto.Image, _configuration["DirnameForFiles:Categories"])) ?? string.Empty;
+            dto.Url = (await _imageService.SaveFileAsync(dto.Image, _configuration["DirnameForFiles:Categories"], cancellationToken)) ?? string.Empty;
         }
         var createDto = new CategoryCreateDTO
         {
@@ -31,7 +31,7 @@ public class CategoryController(ICategoryService _categoryService, IImageService
             Slug = dto.Slug,
             ParentId = dto.ParentId,
         };
-        var id = await _categoryService.CreateCategoryAsync(createDto);
+        var id = await _categoryService.CreateCategoryAsync(createDto, cancellationToken);
 
         if (id == null)
         {
@@ -39,7 +39,7 @@ public class CategoryController(ICategoryService _categoryService, IImageService
         }
 
 
-        var category = await _categoryService.GetCategoryByIdAsync(id.Value);
+        var category = await _categoryService.GetCategoryByIdAsync(id.Value, cancellationToken);
         //return Ok($"Category created {id}");
         return CreatedAtAction(
                     nameof(GetCategoryById), // назва методу
@@ -48,16 +48,17 @@ public class CategoryController(ICategoryService _categoryService, IImageService
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllCategories()
+    public async Task<IActionResult> GetAllCategories(CancellationToken cancellationToken)
     {
-        var categories = await _categoryService.GetAllCategoriesAsync();
+        await Task.Delay(3000, cancellationToken);
+        var categories = await _categoryService.GetAllCategoriesAsync(cancellationToken);
         return Ok(categories);
     }
 
     [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetCategoryById([FromRoute] int id)
+    public async Task<IActionResult> GetCategoryById([FromRoute] int id, CancellationToken cancellationToken)
     {
-        var category = await _categoryService.GetCategoryByIdAsync(id);
+        var category = await _categoryService.GetCategoryByIdAsync(id, cancellationToken);
         if(category == null)
         {
             return NotFound();
@@ -67,43 +68,43 @@ public class CategoryController(ICategoryService _categoryService, IImageService
 
 
     [HttpGet("{id:int}/parents")]
-    public async Task<IActionResult> GetParentsCategoryById([FromRoute] int id)
+    public async Task<IActionResult> GetParentsCategoryById([FromRoute] int id, CancellationToken cancellationToken)
     {
-        var category = await _categoryService.GetCategoryByIdAsync(id);
+        var category = await _categoryService.GetCategoryByIdAsync(id, cancellationToken);
         if (category == null)
         {
             return NotFound();
         }
-        var res = await _categoryService.GetParentsCategoryByIdAsync(category);
+        var res = await _categoryService.GetParentsCategoryByIdAsync(category, cancellationToken);
 
         return Ok(res);
     }
 
     [HttpGet("{id:int}/childrens")]
-    public async Task<IActionResult> GetChildrensCategoryById([FromRoute] int id)
+    public async Task<IActionResult> GetChildrensCategoryById([FromRoute] int id, CancellationToken cancellationToken)
     {
-        var category = await _categoryService.GetCategoryByIdAsync(id);
+        var category = await _categoryService.GetCategoryByIdAsync(id, cancellationToken);
         if (category == null)
         {
             return NotFound();
         }
-        var res = await _categoryService.GetChildrensCategoryByIdAsync(category.Id);
+        var res = await _categoryService.GetChildrensCategoryByIdAsync(category.Id, cancellationToken);
 
         return Ok(res);
     }
 
     [HttpGet("tree")]
-    public async Task<IActionResult> GetTreeCategoryById()
+    public async Task<IActionResult> GetTreeCategoryById(CancellationToken cancellationToken)
     {
-        var category = await _categoryService.GetTreeCategoryByIdAsync();
+        var category = await _categoryService.GetTreeCategoryByIdAsync(cancellationToken);
 
         return Ok(category);
     }
 
     [HttpDelete("{id:int}")]
-    public async Task<IActionResult> DeleteCategory([FromRoute] int id)
+    public async Task<IActionResult> DeleteCategory([FromRoute] int id, CancellationToken cancellationToken)
     {
-        var res = await _categoryService.DeleteCategoryAsync(id);
+        var res = await _categoryService.DeleteCategoryAsync(id, cancellationToken);
         if (!res)
         {
             return NotFound();
@@ -112,9 +113,9 @@ public class CategoryController(ICategoryService _categoryService, IImageService
     }
 
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> UpdateCategory([FromRoute] int id, [FromBody] CategoryUpdateDTO updateDTO)
+    public async Task<IActionResult> UpdateCategory([FromRoute] int id, [FromBody] CategoryUpdateDTO updateDTO , CancellationToken cancellationToken)
     {
-        var res = await _categoryService.UpdateCategoryAsync(id, updateDTO);
+        var res = await _categoryService.UpdateCategoryAsync(id, updateDTO, cancellationToken);
         if (res == null)
         {
             return NotFound();

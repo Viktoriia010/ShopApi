@@ -11,22 +11,22 @@ namespace Shop.Infrastructure.Repositories;
 
 public class AuthRepository(ShopDbContext _context) : IAuthRepository
 {
-    public async Task AddUserAsync(User user)
+    public async Task AddUserAsync(User user, CancellationToken cancellationToken)
     {
-        await _context.Users.AddAsync(user);
-        await _context.SaveChangesAsync();
+        await _context.Users.AddAsync(user, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<bool> IsExistEmailAsync(string email)
+    public async Task<bool> IsExistEmailAsync(string email, CancellationToken cancellationToken)
     {
-        var userFromDb = await _context.Users.FirstOrDefaultAsync(user => user.Email == email);
+        var userFromDb = await _context.Users.FirstOrDefaultAsync(user => user.Email == email, cancellationToken);
         if (userFromDb == null)
             return false;
         return true;
     }
-    public async Task<User?> GetUserByEmailAsync(string email)
+    public async Task<User?> GetUserByEmailAsync(string email, CancellationToken cancellationToken)
     {
-        var userFromDb = await _context.Users.FirstOrDefaultAsync(user => user.Email == email);
+        var userFromDb = await _context.Users.FirstOrDefaultAsync(user => user.Email == email, cancellationToken);
         if (userFromDb == null)
             return null;
         return userFromDb;
@@ -34,12 +34,12 @@ public class AuthRepository(ShopDbContext _context) : IAuthRepository
 
 
 
-    public async Task<User?> RegisterUserAsync(User user, string hash)
+    public async Task<User?> RegisterUserAsync(User user, string hash, CancellationToken cancellationToken)
     {
         user.PasswordHash = hash;
-        await _context.Users.AddAsync(user);
-        await _context.SaveChangesAsync();
-        return await _context.Users.FirstOrDefaultAsync(us => (us.Email == user.Email && us.PasswordHash == user.PasswordHash));
+        await _context.Users.AddAsync(user, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+        return await _context.Users.FirstOrDefaultAsync(us => (us.Email == user.Email && us.PasswordHash == user.PasswordHash), cancellationToken);
         /*
          * TODO:
          1) Перевірити чи немає вже у БД такого email
@@ -49,9 +49,9 @@ public class AuthRepository(ShopDbContext _context) : IAuthRepository
          */
     }
 
-    public async Task UpdateUserAsync(User user)
+    public async Task UpdateUserAsync(User user, CancellationToken cancellationToken)
     {
         _context.Users.Update(user);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

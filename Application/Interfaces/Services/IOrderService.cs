@@ -9,5 +9,5 @@ namespace Shop.Application.Interfaces.Services;
 
 public interface IOrderService
 {
-    Task<OrderResponseDTO> CreateOrderAsync(string email, OrderCreateDTO dto);
+    Task<OrderResponseDTO> CreateOrderAsync(string email, OrderCreateDTO dto,CancellationToken cancellationToken);
 }

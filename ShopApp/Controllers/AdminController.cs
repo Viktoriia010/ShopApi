@@ -13,9 +13,9 @@ public class AdminController(IAdminService _adminService) : ControllerBase
     [Authorize(Roles = "Admin")]
     [HttpPost("create-staff")]
 
-    public async Task<IActionResult> CreateStaff(CreateStaffDTO dto)
+    public async Task<IActionResult> CreateStaff(CreateStaffDTO dto, CancellationToken cancellationToken)
     {
-        var result = await _adminService.CreateStaffAsync(dto);
+        var result = await _adminService.CreateStaffAsync(dto, cancellationToken);
 
         if (!result)
             return BadRequest();
@@ -25,9 +25,9 @@ public class AdminController(IAdminService _adminService) : ControllerBase
 
 
     [HttpPost("reset-password")]
-    public async Task<IActionResult> ResetPassword(ResetPasswordDTO dto)
+    public async Task<IActionResult> ResetPassword(ResetPasswordDTO dto, CancellationToken cancellationToken)
     {
-        var result = await _adminService.ResetPasswordAsync(dto);
+        var result = await _adminService.ResetPasswordAsync(dto, cancellationToken);
 
         if (!result)
             return BadRequest("Invalid or expired token.");

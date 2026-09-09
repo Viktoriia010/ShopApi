@@ -14,10 +14,10 @@ namespace Shop.Application.Services;
 public class CategoryService(ICategoryRepository _repository, IMapper _mapper, ICachingService _cacheService) : ICategoryService
 {
     //додати автомапер
-    public async Task<int?> CreateCategoryAsync(CategoryCreateDTO dto)
+    public async Task<int?> CreateCategoryAsync(CategoryCreateDTO dto, CancellationToken cancellationToken)
     {
         var category = _mapper.Map<Category>(dto);
-        return await _repository.AddCategoryAsync(category);
+        return await _repository.AddCategoryAsync(category, cancellationToken);
         //return await _repository.AddCategoryAsync(new Category()
         //{
         //    Name = dto.Name,
@@ -27,70 +27,45 @@ public class CategoryService(ICategoryRepository _repository, IMapper _mapper, I
         //});
     }
 
-    public async Task<bool> DeleteCategoryAsync(int id)
+    public async Task<bool> DeleteCategoryAsync(int id, CancellationToken cancellationToken)
     {
-        return await _repository.DeleteCategoryAsync(id);
+        return await _repository.DeleteCategoryAsync(id, cancellationToken);
     }
 
-    public async Task<List<CategoryReadDTO>?> GetAllCategoriesAsync()
+    public async Task<List<CategoryReadDTO>?> GetAllCategoriesAsync(CancellationToken cancellationToken)
     {
+        await Task.Delay(5000, cancellationToken);
         var cache = await _cacheService.GetAsync<List<CategoryReadDTO>>("Categories");
         if (cache == null)
         {
-            var categories = await _repository.GetAllCategoriesAsync();
+            var categories = await _repository.GetAllCategoriesAsync(cancellationToken);
             cache = _mapper.Map<List<CategoryReadDTO>>(categories);
             await _cacheService.SetAsync("Categories", cache, null);
 
         }
         return cache;
-        //var categories = await _repository.GetAllCategoriesAsync();
-        //List<CategoryReadDTO> dtos = new List<CategoryReadDTO>();
-        //if (categories != null && categories.Count > 0)
-        //{
-        //    dtos = _mapper.Map<List<CategoryReadDTO>>(categories);
-        //    //foreach (var item in categories)
-        //    //{
-        //    //    dtos.Add(new CategoryReadDTO()
-        //    //    {
-        //    //        Id = item.Id,
-        //    //        Name = item.Name,
-        //    //        Slug = item.Slug,
-        //    //        Url = item.Url,
-        //    //        ParentId = item.ParentId,
-        //    //    });
-        //    //}
-        //}
-
-        //return dtos;
     }
 
-    public async Task<CategoryReadDTO?> GetCategoryByIdAsync(int id)
+    public async Task<CategoryReadDTO?> GetCategoryByIdAsync(int id, CancellationToken cancellationToken)
     {
         var cacheKey = $"Category_{id}";
         var cache = await _cacheService.GetAsync<CategoryReadDTO>(cacheKey);
         if(cache == null)
         {
-            var res = await _repository.GetCategoryByIdAsync(id);
+            var res = await _repository.GetCategoryByIdAsync(id, cancellationToken);
             cache = _mapper.Map<CategoryReadDTO>(res);
             await _cacheService.SetAsync(cacheKey, cache, null);
         }
         return cache;
-        //CategoryReadDTO dto = null;
-        //var res = await _repository.GetCategoryByIdAsync(id);
-        //if (res != null)
-        //{
-        //    dto = _mapper.Map<CategoryReadDTO>(res);
-        //}
-        //return dto;
     }
 
-    public async Task<List<CategoryReadDTO>> GetParentsCategoryByIdAsync(CategoryReadDTO dto)
+    public async Task<List<CategoryReadDTO>> GetParentsCategoryByIdAsync(CategoryReadDTO dto, CancellationToken cancellationToken)
     {
         List<CategoryReadDTO> categories = new List<CategoryReadDTO>();
 
         while (dto.ParentId != null)
         {
-            var parent = await GetCategoryByIdAsync(dto.ParentId.Value);
+            var parent = await GetCategoryByIdAsync(dto.ParentId.Value, cancellationToken);
             categories.Add(parent);
             dto = parent;
 
@@ -98,9 +73,9 @@ public class CategoryService(ICategoryRepository _repository, IMapper _mapper, I
 
         return categories;
     }
-    public async Task<List<CategoryReadDTO>> GetChildrensCategoryByIdAsync(int id)
+    public async Task<List<CategoryReadDTO>> GetChildrensCategoryByIdAsync(int id, CancellationToken cancellationToken)
     {
-        var categories = await GetAllCategoriesAsync();
+        var categories = await GetAllCategoriesAsync(cancellationToken);
 
         if (categories == null)
         {
@@ -112,7 +87,7 @@ public class CategoryService(ICategoryRepository _repository, IMapper _mapper, I
         {
             childrens.Add(item);
 
-            var descendants = await GetChildrensCategoryByIdAsync(item.Id);
+            var descendants = await GetChildrensCategoryByIdAsync(item.Id, cancellationToken);
 
             childrens.AddRange(descendants);
         }
@@ -121,12 +96,7 @@ public class CategoryService(ICategoryRepository _repository, IMapper _mapper, I
     }
     private CategoryTreeDTO BuildTree(CategoryReadDTO category,List<CategoryReadDTO> allCategories)
     {
-        //var node = new CategoryTreeDTO
-        //{
-        //    Id = category.Id,
-        //    Name = category.Name,
-        //    ParentId = category.ParentId
-        //};
+      
         var node = _mapper.Map<CategoryTreeDTO>(category);
 
         var children = allCategories
@@ -140,9 +110,9 @@ public class CategoryService(ICategoryRepository _repository, IMapper _mapper, I
 
         return node;
     }
-    public async Task<List<CategoryTreeDTO>> GetTreeCategoryByIdAsync()
+    public async Task<List<CategoryTreeDTO>> GetTreeCategoryByIdAsync(CancellationToken cancellationToken)
     {
-        var categories = await GetAllCategoriesAsync();
+        var categories = await GetAllCategoriesAsync(cancellationToken);
 
         if (categories == null || !categories.Any())
         {
@@ -163,32 +133,21 @@ public class CategoryService(ICategoryRepository _repository, IMapper _mapper, I
         return tree;
     }
 
-    public async Task<CategoryUpdateDTO?> UpdateCategoryAsync(int id, CategoryUpdateDTO updated)
+    public async Task<CategoryUpdateDTO?> UpdateCategoryAsync(int id, CategoryUpdateDTO updated, CancellationToken cancellationToken)
     {
        
-        var category = await _repository.GetCategoryByIdAsync(id);
+        var category = await _repository.GetCategoryByIdAsync(id, cancellationToken);
 
         if (category == null)
             return null;
         _mapper.Map(updated, category);
-        //category.Name = updated.Name;
-        //category.Url = updated.Url;
-        //category.ParentId = updated.ParentId;
-        //category.Slug = updated.Slug;
-        //category.IsActive = updated.IsActive;
+   
 
-        var result = await _repository.UpdateCategoryAsync(category);
+        var result = await _repository.UpdateCategoryAsync(category, cancellationToken);
         if (result == null)
             return null;
         return _mapper.Map<CategoryUpdateDTO>(result);
-        //return new CategoryUpdateDTO
-        //{
-        //    Name = result.Name,
-        //    Slug = result.Slug,
-        //    Url = result.Url,
-        //    IsActive = result.IsActive,
-        //    ParentId = result.ParentId
-        //};
+
     }
 
 

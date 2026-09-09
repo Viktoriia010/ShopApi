@@ -10,10 +10,10 @@ namespace Shop.Application.Interfaces.Repository;
 
 public interface ICategoryRepository
 {
-    Task<int?> AddCategoryAsync(Category category);
-    Task<List<Category>?> GetAllCategoriesAsync();
-    Task<Category?> GetCategoryByIdAsync(int id);
-    Task<bool> DeleteCategoryAsync(int id);
-    Task<Category?> UpdateCategoryAsync(Category updated);
+    Task<int?> AddCategoryAsync(Category category, CancellationToken cancellationToken);
+    Task<List<Category>?> GetAllCategoriesAsync(CancellationToken cancellationToken);
+    Task<Category?> GetCategoryByIdAsync(int id, CancellationToken cancellationToken);
+    Task<bool> DeleteCategoryAsync(int id, CancellationToken cancellationToken);
+    Task<Category?> UpdateCategoryAsync(Category updated, CancellationToken cancellationToken);
 
 }

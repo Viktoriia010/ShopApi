@@ -15,7 +15,7 @@ public class OrderController(IOrderService _orderService, IQueueService _queue) 
 {
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDTO dto)
+    public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDTO dto, CancellationToken cancellationToken)
     {
         if (dto.Items == null || dto.Items.Count == 0)
         {
@@ -26,9 +26,9 @@ public class OrderController(IOrderService _orderService, IQueueService _queue) 
         {
             return BadRequest("Email не найдено");
         }
-        var resp = await _orderService.CreateOrderAsync(email, dto);
+        var resp = await _orderService.CreateOrderAsync(email, dto, cancellationToken);
   
-        await _queue.PublishAsync("Orders",  resp);
+        await _queue.PublishAsync("Orders",  resp, cancellationToken);
 
         return Ok(new
         {

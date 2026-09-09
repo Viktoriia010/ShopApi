@@ -12,21 +12,21 @@ namespace Shop.Infrastructure.Repositories;
 
 public class PasswordResetTokenRepository(ShopDbContext _context) : IPasswordResetTokenRepository
 {
-    public async Task AddAsync(PasswordResetToken token)
+    public async Task AddAsync(PasswordResetToken token, CancellationToken cancellationToken)
     {
-        await _context.PasswordResetTokens.AddAsync(token);
-        await _context.SaveChangesAsync();
+        await _context.PasswordResetTokens.AddAsync(token, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<PasswordResetToken?> GetByTokenHashAsync(string tokenHash)
+    public async Task<PasswordResetToken?> GetByTokenHashAsync(string tokenHash, CancellationToken cancellationToken)
     {
         return await _context.PasswordResetTokens
             .Include(x => x.User)
-            .FirstOrDefaultAsync(x => x.TokenHash == tokenHash);
+            .FirstOrDefaultAsync(x => x.TokenHash == tokenHash, cancellationToken);
     }
-    public async Task UpdateAsync(PasswordResetToken token)
+    public async Task UpdateAsync(PasswordResetToken token, CancellationToken cancellationToken)
     {
         _context.PasswordResetTokens.Update(token);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

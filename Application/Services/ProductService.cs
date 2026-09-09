@@ -10,7 +10,7 @@ namespace Shop.Api.Services;
 
 public class ProductService(IProductRepository _repository, IMapper _mapper, ICachingService _cacheService) : IProductService
 {
-    public async Task<int> CreateProductAsync(ProductCreateDTO dto)
+    public async Task<int> CreateProductAsync(ProductCreateDTO dto, CancellationToken cancellationToken)
     {
         var product = _mapper.Map<Product>(dto);
 
@@ -21,15 +21,15 @@ public class ProductService(IProductRepository _repository, IMapper _mapper, ICa
                 IsPrimary = false
             })
             .ToList() ?? new List<ProductImage>();
-        return await _repository.AddProductAsync(product);
+        return await _repository.AddProductAsync(product, cancellationToken);
     }
 
-    public async Task<List<ProductReadDTO>> GetAllProductsAsync()
+    public async Task<List<ProductReadDTO>> GetAllProductsAsync(CancellationToken cancellationToken)
     {
         var cache = await _cacheService.GetAsync<List<ProductReadDTO>>("Products");
         if (cache == null)
         {
-            var products = await _repository.GetAllProductsAsync();
+            var products = await _repository.GetAllProductsAsync(cancellationToken);
             cache = _mapper.Map<List<ProductReadDTO>>(products);
             await _cacheService.SetAsync("Products", cache, null);
 
@@ -47,13 +47,13 @@ public class ProductService(IProductRepository _repository, IMapper _mapper, ICa
     }
 
 
-    public async Task<ProductReadDTO?> GetProductByIdAsync(int id)
+    public async Task<ProductReadDTO?> GetProductByIdAsync(int id, CancellationToken cancellationToken)
     {
         var cacheKey = $"Product_{id}";
         var cache = await _cacheService.GetAsync<ProductReadDTO>(cacheKey);
         if (cache == null)
         {
-            var res = await _repository.GetProductByIdAsync(id);
+            var res = await _repository.GetProductByIdAsync(id, cancellationToken);
             cache = _mapper.Map<ProductReadDTO>(res);
             await _cacheService.SetAsync(cacheKey, cache, null);
         }
@@ -66,9 +66,9 @@ public class ProductService(IProductRepository _repository, IMapper _mapper, ICa
         //return null;
     }
 
-    public async Task<List<ProductReadDTO>?> GetProductsByCategoryAsync(int categoryId)
+    public async Task<List<ProductReadDTO>?> GetProductsByCategoryAsync(int categoryId, CancellationToken cancellationToken)
     {
-        var res = await _repository.GetProductsByCategoryAsync(categoryId);
+        var res = await _repository.GetProductsByCategoryAsync(categoryId, cancellationToken);
         if (res != null)
         {
             return _mapper.Map<List<ProductReadDTO>>(res);

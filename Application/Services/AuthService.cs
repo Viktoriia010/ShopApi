@@ -15,9 +15,9 @@ namespace Shop.Application.Services;
 
 public class AuthService(IMapper _mapper, IAuthRepository _repository, IRefreshTokenRepository _refreshTokenRepository, IHashHelper _hashHelper, IJWTService _jwtService, IQueueService _queue) : IAuthService
 {
-    public async Task<(string? AccessToken, (string? RefreshToken, int ExpireDays) RefreshToken)> UserAuthenticationAsync(UserLoginDTO dto)
+    public async Task<(string? AccessToken, (string? RefreshToken, int ExpireDays) RefreshToken)> UserAuthenticationAsync(UserLoginDTO dto, CancellationToken cancellationToken)
     {
-        var user = await _repository.GetUserByEmailAsync(dto.Email);
+        var user = await _repository.GetUserByEmailAsync(dto.Email, cancellationToken);
         if (user == null)
         {
             return (null, (null, 0));
@@ -34,14 +34,14 @@ public class AuthService(IMapper _mapper, IAuthRepository _repository, IRefreshT
             UserId = user.Id,
             ExpiresAt = DateTime.UtcNow.AddDays(refreshToken.ExpireDays)
         };
-        await _refreshTokenRepository.AddRefreshToken(refresh);
+        await _refreshTokenRepository.AddRefreshToken(refresh, cancellationToken);
         return (_jwtService.GenerateAccessToken(_mapper.Map<UserLoginDTO>(user), user.Role.ToString()), refreshToken);
 
     }
 
-    public async Task<(UserReadDTO? User, string? Token,(string? RefreshToken, int ExpireDays) RefreshToken)> RegisterAsync(UserCreateDTO dto)
+    public async Task<(UserReadDTO? User, string? Token,(string? RefreshToken, int ExpireDays) RefreshToken)> RegisterAsync(UserCreateDTO dto, CancellationToken cancellationToken)
     {
-        var isExist = await _repository.IsExistEmailAsync(dto.Email);
+        var isExist = await _repository.IsExistEmailAsync(dto.Email, cancellationToken);
         if (!isExist)
         {
             var hash = _hashHelper.Hash(dto.Password);
@@ -49,7 +49,7 @@ public class AuthService(IMapper _mapper, IAuthRepository _repository, IRefreshT
             var token = _jwtService.GenerateAccessToken(_mapper.Map<UserLoginDTO>(user), user.Role.ToString());
             var refreshToken = _jwtService.GenerateRefreshToken();
    
-            var registerUser = await _repository.RegisterUserAsync(user, hash);
+            var registerUser = await _repository.RegisterUserAsync(user, hash, cancellationToken);
 
             if (registerUser != null)
             {
@@ -59,16 +59,16 @@ public class AuthService(IMapper _mapper, IAuthRepository _repository, IRefreshT
                     UserId = registerUser.Id,
                     ExpiresAt = DateTime.UtcNow.AddDays(refreshToken.ExpireDays)
                 };
-                await _refreshTokenRepository.AddRefreshToken(refresh);
-                await _queue.PublishAsync("Users",  new { Email = registerUser.Email, Password = registerUser.PasswordHash } );
+                await _refreshTokenRepository.AddRefreshToken(refresh, cancellationToken);
+                await _queue.PublishAsync("Users",  new { Email = registerUser.Email, Password = registerUser.PasswordHash }, cancellationToken);
                 return (_mapper.Map<UserReadDTO>(registerUser), token, refreshToken);
             }
         }
         return (null, null, (null, 0));
     }
-    public async Task<string> RefreshTokenAsync(string refreshToken)
+    public async Task<string> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
     {
-        var storedToken = await _refreshTokenRepository.GetValidRefreshTokenAsync(refreshToken);
+        var storedToken = await _refreshTokenRepository.GetValidRefreshTokenAsync(refreshToken, cancellationToken);
 
         if (storedToken == null)
         {
@@ -83,14 +83,14 @@ public class AuthService(IMapper _mapper, IAuthRepository _repository, IRefreshT
         return accessToken;
     }
 
-    public async Task LogoutAsync(string refreshToken)
+    public async Task LogoutAsync(string refreshToken, CancellationToken cancellationToken)
     {
-        await _refreshTokenRepository.DeleteTokenAsync(refreshToken);
+        await _refreshTokenRepository.DeleteTokenAsync(refreshToken, cancellationToken);
     }
 
-    public async Task<UserReadDTO?> GetProfileAsync(string email)
+    public async Task<UserReadDTO?> GetProfileAsync(string email, CancellationToken cancellationToken)
     {
-        var user = await _repository.GetUserByEmailAsync(email);
+        var user = await _repository.GetUserByEmailAsync(email, cancellationToken);
         if(user == null) {
             return null;
         }
