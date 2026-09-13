@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Api.Interfaces;
 using Shop.Api.Requests.Categories;
 using Shop.Api.Services;
+using Shop.Application.Commands.Category;
 using Shop.Application.DTOs.CategoryDTOs;
 using Shop.Application.Interfaces.Services;
+using Shop.Application.Queries.Category;
 using ShopDomain.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -13,7 +16,7 @@ namespace Shop.Api.Controllers;
 [ApiController]
 [Route("api/v1/[controller]")]
 
-public class CategoryController(ICategoryService _categoryService, IImageService _imageService, IConfiguration _configuration) : ControllerBase
+public class CategoryController(ICategoryService _categoryService, IImageService _imageService, IConfiguration _configuration, IMediator _mediator) : ControllerBase
 {
 
     [Authorize]
@@ -31,7 +34,8 @@ public class CategoryController(ICategoryService _categoryService, IImageService
             Slug = dto.Slug,
             ParentId = dto.ParentId,
         };
-        var id = await _categoryService.CreateCategoryAsync(createDto, cancellationToken);
+        //var id = await _categoryService.CreateCategoryAsync(createDto, cancellationToken);
+        var id = await _mediator.Send(new CreateCategoryCommand(createDto), cancellationToken);
 
         if (id == null)
         {
@@ -58,8 +62,9 @@ public class CategoryController(ICategoryService _categoryService, IImageService
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetCategoryById([FromRoute] int id, CancellationToken cancellationToken)
     {
-        var category = await _categoryService.GetCategoryByIdAsync(id, cancellationToken);
-        if(category == null)
+        //var category = await _categoryService.GetCategoryByIdAsync(id, cancellationToken);
+        var category = await _mediator.Send(new GetCategoryByIdQuery(id), cancellationToken);
+        if (category == null)
         {
             return NotFound();
         }
@@ -123,5 +128,17 @@ public class CategoryController(ICategoryService _categoryService, IImageService
         return Ok(res); 
     }
 
+
+    [HttpGet("{slug}")]
+
+    public async Task<ActionResult<CategoryReadDTO>> GetCategoryBySlug(string slug, CancellationToken cancellationToken)
+    {
+        var dto = await _mediator.Send(new GetCategoryBySlugQuery(slug), cancellationToken) ;
+
+        if (dto == null)
+            return NotFound();
+
+        return Ok(dto);
+    }
 
 }

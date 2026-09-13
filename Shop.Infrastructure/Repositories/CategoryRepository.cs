@@ -49,4 +49,10 @@ public class CategoryRepository(ShopDbContext _context) : ICategoryRepository
         return updated;
 
     }
+    public async Task<Category?> GetCategoryBySlugAsync(string slug, CancellationToken cancellationToken)
+    {
+        return await _context.Categories
+             .Include(c => c.Products)
+             .FirstOrDefaultAsync(c => c.Slug == slug, cancellationToken);
+    }
 }

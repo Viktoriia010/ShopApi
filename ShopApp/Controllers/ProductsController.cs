@@ -53,7 +53,8 @@ public class ProductsController(IProductService _productService, IImageService _
                 ImagesUrl = imageUrls
 
             };
-        var id = await _productService.CreateProductAsync(createDto, cancellationToken);
+        //var id = await _productService.CreateProductAsync(createDto, cancellationToken);
+        var id = await _mediator.Send(new CreateProductCommand(createDto), cancellationToken);
         return CreatedAtAction(
                     nameof(GetProductById), // назва методу
                     new { id },              // параметри маршруту
@@ -70,7 +71,7 @@ public class ProductsController(IProductService _productService, IImageService _
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetProductById([FromRoute] int id, CancellationToken cancellationToken)
     {
-        var product = await _mediator.Send(new GetProductByIdQuery(id));
+        var product = await _mediator.Send(new GetProductByIdQuery(id) , cancellationToken);
         //var product = await _productService.GetProductByIdAsync(id);
         if (product == null)
         {

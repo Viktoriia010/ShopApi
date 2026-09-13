@@ -1,13 +1,16 @@
 
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MongoDB.Driver;
 using RabbitMQ.Client;
 using Shop.Api.Interfaces;
 using Shop.Api.Middleware;
 using Shop.Api.Services;
+using Shop.Application.Interfaces.Configurations;
 using Shop.Application.Interfaces.Helpers;
 using Shop.Application.Interfaces.Repository;
 using Shop.Application.Interfaces.Services;
@@ -157,6 +160,7 @@ public class Program
         builder.Services.AddScoped<IEmailService, EmailService>();
         builder.Services.AddScoped<IQueueService, RabbitMqService>();
         builder.Services.AddScoped<IOrderService, OrderService>();
+        builder.Services.AddScoped<IFilePathProvider, FilePathProvider>();
         builder.Services.AddScoped<IOrderProcessingService, OrderProcessingService>();
         builder.Services.AddScoped<IMongoDbService, MongoDbService>();
         builder.Services.AddHostedService<RabbitMqOrderReaderService>();
@@ -173,29 +177,48 @@ public class Program
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         //builder.Services.AddOpenApi();
-        // ================= Authentication =================
-        builder.Services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-        .AddJwtBearer(options =>
+       // ================= AUTHENTICATION (JWT + COOKIES + GOOGLE) =================
+       builder.Services.AddAuthentication(options =>
+       {
+          // Для стандартних API-запитів використовуємо JWT
+          options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+          options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+       })
+       .AddJwtBearer(options =>
          {
-             //Правила перевірки токена
-             options.TokenValidationParameters = new TokenValidationParameters            {
-             ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = jwtSettings.Issuer,
-                ValidAudience = jwtSettings.Audience,
-                IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(jwtSettings.Key)
-                ),
-                ClockSkew = TimeSpan.Zero
-            };
-    });
-        builder.Services.AddAuthorization();
+
+             options.TokenValidationParameters = new TokenValidationParameters
+             {
+                 ValidateIssuer = true,
+                 ValidateAudience = true,
+                 ValidateLifetime = true,
+                 ValidateIssuerSigningKey = true,
+                 ValidIssuer = jwtSettings.Issuer,
+                 ValidAudience = jwtSettings.Audience,
+                 IssuerSigningKey = new SymmetricSecurityKey(
+
+                     Encoding.UTF8.GetBytes(jwtSettings.Key)
+
+                 ),
+
+                 ClockSkew = TimeSpan.Zero
+             };
+
+         })
+
+         .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme) // Потрібно для зберігання стану OAuth
+         .AddGoogle(options =>
+
+         {
+
+                options.ClientId = configuration["Authentication:Google:ClientId"]!;
+
+                options.ClientSecret = configuration["Authentication:Google:ClientSecret"]!;
+
+                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+
+            });
         var app = builder.Build();
         //------------------SEEDING--------------
         using (var scope = app.Services.CreateScope())
