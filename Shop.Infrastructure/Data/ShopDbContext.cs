@@ -15,6 +15,7 @@ public class ShopDbContext : DbContext
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
     public DbSet<Orders> Orders { get; set; }
     public DbSet<OrderDetails> OrderDetails { get; set; }
+    public DbSet<Address> Addresses { get; set; }
     
     // Автоматично встановлює CreatedAt і UpdatedAt перед збереженням
     public override int SaveChanges()

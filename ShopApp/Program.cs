@@ -150,6 +150,7 @@ public class Program
         //------------------SERVICES-------------
         builder.Services.AddScoped<IProductService, ProductService>();
         builder.Services.AddScoped<ICategoryService, CategoryService>();
+        builder.Services.AddScoped<IAddressService, AddressService>();
         builder.Services.AddScoped<IImageService,  ImageService>();
         //builder.Services.AddScoped<ICachingService, MemoryCachingService>();
         builder.Services.AddScoped<ICachingService, RedisCachingService>();
@@ -171,6 +172,7 @@ public class Program
         builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
         builder.Services.AddScoped<IProductRepository, ProductRepository>();
         builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+        builder.Services.AddScoped<IAddressRepository, AddressRepository>();
         builder.Services.AddScoped<IOrderRepository, OrderRepository>();
         builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         builder.Services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();

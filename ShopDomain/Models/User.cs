@@ -28,4 +28,8 @@ public class User : BaseEntity
 
     [Column("is_active")]
     public bool IsActive { get; set; } = true;
+
+    [Column("verified")]
+    public bool? Verified { get; set; }
+    public ICollection<Address> Addresses { get; set; } = new List<Address>();
 }
