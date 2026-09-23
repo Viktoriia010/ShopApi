@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using FluentValidation;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Api.Interfaces;
@@ -8,6 +9,7 @@ using Shop.Application.Commands.Category;
 using Shop.Application.DTOs.CategoryDTOs;
 using Shop.Application.Interfaces.Services;
 using Shop.Application.Queries.Category;
+using Shop.Application.Validators.Category;
 using ShopDomain.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -16,10 +18,10 @@ namespace Shop.Api.Controllers;
 [ApiController]
 [Route("api/v1/[controller]")]
 
-public class CategoryController(ICategoryService _categoryService, IImageService _imageService, IConfiguration _configuration, IMediator _mediator) : ControllerBase
+public class CategoryController(ICategoryService _categoryService, IImageService _imageService, IConfiguration _configuration, IMediator _mediator, IValidator<CategoryCreateDTO> _validator) : ControllerBase
 {
 
-    [Authorize]
+    //[Authorize]
     [HttpPost]
     public async Task<IActionResult> CreateCategory([FromForm] CategoryCreateRequest dto, CancellationToken cancellationToken)
     {
@@ -34,6 +36,15 @@ public class CategoryController(ICategoryService _categoryService, IImageService
             Slug = dto.Slug,
             ParentId = dto.ParentId,
         };
+        var result = await _validator.ValidateAsync(createDto);
+
+        if (!result.IsValid)
+        {
+
+            return BadRequest(result.Errors);
+
+        }
+
         //var id = await _categoryService.CreateCategoryAsync(createDto, cancellationToken);
         var id = await _mediator.Send(new CreateCategoryCommand(createDto), cancellationToken);
 

@@ -34,7 +34,6 @@ public class CategoryService(ICategoryRepository _repository, IMapper _mapper, I
 
     public async Task<List<CategoryReadDTO>?> GetAllCategoriesAsync(CancellationToken cancellationToken)
     {
-        await Task.Delay(5000, cancellationToken);
         var cache = await _cacheService.GetAsync<List<CategoryReadDTO>>("Categories");
         if (cache == null)
         {

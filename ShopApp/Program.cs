@@ -1,4 +1,5 @@
 
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -15,8 +16,11 @@ using Shop.Application.Interfaces.Helpers;
 using Shop.Application.Interfaces.Repository;
 using Shop.Application.Interfaces.Services;
 using Shop.Application.Mapping;
+using Shop.Application.Queries.Category;
 using Shop.Application.Queries.Product;
 using Shop.Application.Services;
+using Shop.Application.Validators.Category;
+using Shop.Application.Validators.Product;
 using Shop.Infrastructure.Configuration;
 using Shop.Infrastructure.Data;
 using Shop.Infrastructure.Helpers;
@@ -61,7 +65,7 @@ public class Program
         //==================MEDIATR======================
         builder.Services.AddMediatR(cfg =>
         {
-            cfg.RegisterServicesFromAssembly(typeof(GetProductByIdHandler).Assembly);
+            cfg.RegisterServicesFromAssembly(typeof(GetCategoryByIdHandler).Assembly);
         });
         // ================= AutoMapper =================
         builder.Services.AddAutoMapper(
@@ -105,6 +109,10 @@ public class Program
 
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
+
+        //======================VALIDATORS=================
+        builder.Services.AddValidatorsFromAssemblyContaining<CategoryValidator>();
+        builder.Services.AddValidatorsFromAssemblyContaining<ProductFeedbackValidator>();
         // ================= Swagger + JWT =================
         builder.Services.AddSwaggerGen(options =>
         {
