@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Api.Interfaces;
 using Shop.Api.Requests.Categories;
@@ -18,7 +19,7 @@ namespace Shop.Api.Controllers;
 [ApiController]
 [Route("api/v1/[controller]")]
 
-public class CategoryController(ICategoryService _categoryService, IImageService _imageService, IConfiguration _configuration, IMediator _mediator, IValidator<CategoryCreateDTO> _validator) : ControllerBase
+public class CategoryController(ICategoryService _categoryService, IImageService _imageService, IConfiguration _configuration, IMediator _mediator, IValidator<CategoryCreateDTO> _validator, IValidator<CategoryUpdateDTO> _validatorUpdate) : ControllerBase
 {
 
     //[Authorize]
@@ -131,6 +132,14 @@ public class CategoryController(ICategoryService _categoryService, IImageService
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateCategory([FromRoute] int id, [FromBody] CategoryUpdateDTO updateDTO , CancellationToken cancellationToken)
     {
+        var result = await _validatorUpdate.ValidateAsync(updateDTO);
+
+        if (!result.IsValid)
+        {
+
+            return BadRequest(result.Errors);
+
+        }
         var res = await _categoryService.UpdateCategoryAsync(id, updateDTO, cancellationToken);
         if (res == null)
         {

@@ -19,6 +19,7 @@ using Shop.Application.Mapping;
 using Shop.Application.Queries.Category;
 using Shop.Application.Queries.Product;
 using Shop.Application.Services;
+using Shop.Application.Validators.Address;
 using Shop.Application.Validators.Category;
 using Shop.Application.Validators.Product;
 using Shop.Infrastructure.Configuration;
@@ -112,6 +113,8 @@ public class Program
 
         //======================VALIDATORS=================
         builder.Services.AddValidatorsFromAssemblyContaining<CategoryValidator>();
+        builder.Services.AddValidatorsFromAssemblyContaining<CategoryUpdateValidator>();
+        builder.Services.AddValidatorsFromAssemblyContaining<AddressCreateValidator>();
         builder.Services.AddValidatorsFromAssemblyContaining<ProductFeedbackValidator>();
         // ================= Swagger + JWT =================
         builder.Services.AddSwaggerGen(options =>

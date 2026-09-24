@@ -13,18 +13,11 @@ namespace Shop.Application.Services;
 
 public class CategoryService(ICategoryRepository _repository, IMapper _mapper, ICachingService _cacheService) : ICategoryService
 {
-    //додати автомапер
     public async Task<int?> CreateCategoryAsync(CategoryCreateDTO dto, CancellationToken cancellationToken)
     {
         var category = _mapper.Map<Category>(dto);
         return await _repository.AddCategoryAsync(category, cancellationToken);
-        //return await _repository.AddCategoryAsync(new Category()
-        //{
-        //    Name = dto.Name,
-        //    Slug = dto.Slug,
-        //    Url = dto.Url,
-        //    ParentId = dto.ParentId,
-        //});
+
     }
 
     public async Task<bool> DeleteCategoryAsync(int id, CancellationToken cancellationToken)

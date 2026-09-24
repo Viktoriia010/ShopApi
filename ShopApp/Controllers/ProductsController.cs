@@ -1,7 +1,9 @@
 ﻿
 using AutoMapper;
 using Azure.Core;
+using FluentValidation;
 using MediatR;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shop.Api.Filters;
@@ -9,6 +11,7 @@ using Shop.Api.Interfaces;
 using Shop.Api.Requests.Categories;
 using Shop.Api.Requests.Products;
 using Shop.Application.Commands.Product;
+using Shop.Application.DTOs.AddressDTOs;
 using Shop.Application.DTOs.CategoryDTOs;
 using Shop.Application.DTOs.ProductDTOs;
 using Shop.Application.DTOs.ProductFeedbackDTOs;
@@ -23,7 +26,7 @@ namespace Shop.Api.Controllers;
 [ApiController]
 [Route("api/v1/[controller]")]
 [LogActionFilter]
-public class ProductsController(IProductService _productService, IImageService _imageService, IConfiguration _configuration, IMongoDbService _mongoDbService, IMediator _mediator) : ControllerBase
+public class ProductsController(IProductService _productService, IImageService _imageService, IConfiguration _configuration, IMongoDbService _mongoDbService, IMediator _mediator, IValidator<ProductFeedbackDTO> _validator) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> CreateProduct([FromForm] ProductCreateRequest dto, CancellationToken cancellationToken)
@@ -90,6 +93,15 @@ public class ProductsController(IProductService _productService, IImageService _
     [HttpPost("{productId}/feedback")]
     public async Task<IActionResult> AddProductFeedback([FromBody] ProductFeedbackDTO feedback,int productId, CancellationToken cancellationToken)
     {
+        var result = await _validator.ValidateAsync(feedback);
+
+        if (!result.IsValid)
+        {
+
+            return BadRequest(result.Errors);
+
+        }
+
         feedback.ProductId = productId;
 
         await _mongoDbService.AddFeedbackAsync(feedback, cancellationToken);
