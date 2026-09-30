@@ -54,4 +54,9 @@ public class AuthRepository(ShopDbContext _context) : IAuthRepository
         _context.Users.Update(user);
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<List<User>?> GetAllUsersAsync(CancellationToken cancellationToken)
+    {
+        return await _context.Users.ToListAsync(cancellationToken);
+    }
 }

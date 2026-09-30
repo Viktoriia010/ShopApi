@@ -1,4 +1,5 @@
-﻿using Shop.Application.DTOs.UserDTOs;
+﻿using AutoMapper;
+using Shop.Application.DTOs.UserDTOs;
 using Shop.Application.Interfaces.Helpers;
 using Shop.Application.Interfaces.Repository;
 using Shop.Application.Interfaces.Services;
@@ -14,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Shop.Application.Services;
 
-public class AdminService(IAuthRepository _authRepository, IPasswordResetTokenService _passwordResetTokenService, IHashHelper _hashHelper, IPasswordResetTokenRepository _passwordResetTokenRepository, IEmailService _emailService) : IAdminService
+public class AdminService(IAuthRepository _authRepository, IPasswordResetTokenService _passwordResetTokenService, IHashHelper _hashHelper, IPasswordResetTokenRepository _passwordResetTokenRepository, IEmailService _emailService, IMapper _mapper) : IAdminService
 {
     public async Task<bool> CreateStaffAsync(CreateStaffDTO dto, CancellationToken cancellationToken)
     {
@@ -55,6 +56,19 @@ public class AdminService(IAuthRepository _authRepository, IPasswordResetTokenSe
         return true;
 
     }
+
+    public async Task<List<UserReadDTO>?> GetAllUsersAsync(CancellationToken cancellationToken)
+    {
+        var users = await _authRepository.GetAllUsersAsync(cancellationToken);
+
+        if (users == null)
+        {
+            return new List<UserReadDTO>();
+        }
+
+        return _mapper.Map<List<UserReadDTO>>(users);
+    }
+
     public async Task<bool> ResetPasswordAsync(ResetPasswordDTO dto, CancellationToken cancellationToken)
     {
         var tokenHash = _passwordResetTokenService.HashToken(dto.Token); 

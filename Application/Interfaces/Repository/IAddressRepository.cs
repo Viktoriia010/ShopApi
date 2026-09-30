@@ -10,4 +10,5 @@ namespace Shop.Application.Interfaces.Repository;
 public interface IAddressRepository
 {
     Task<Address> AddAddressAsync(Address address, CancellationToken cancellationToken);
+    Task<List<Address>?> GetAllAddressAsync(Guid userId, CancellationToken cancellationToken);
 }

@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using Shop.Application.DTOs.AddressDTOs;
+using Shop.Application.DTOs.ProductDTOs;
 using Shop.Application.Interfaces.Repository;
 using Shop.Application.Interfaces.Services;
 using ShopDomain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,5 +26,16 @@ public class AddressService(IAddressRepository _addressRepository, IAuthReposito
         address.UserId = user.Id;
         var resp = await _addressRepository.AddAddressAsync(address, cancellationToken);
         return _mapper.Map<AddressReadDTO>(resp);
+    }
+    public async Task<List<AddressReadDTO>?> GetAllAddressAsync(string email, CancellationToken cancellationToken)
+    {
+        var user = await _authRepository.GetUserByEmailAsync(email, cancellationToken);
+        if (user == null)
+        {
+            throw new Exception("Користувача не найдено");
+        }
+        var addresses = await _addressRepository.GetAllAddressAsync(user.Id, cancellationToken);
+        return _mapper.Map<List<AddressReadDTO>>(addresses);
+
     }
 }

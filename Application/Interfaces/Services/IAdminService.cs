@@ -11,4 +11,5 @@ public interface IAdminService
 {
     Task<bool> CreateStaffAsync(CreateStaffDTO dto, CancellationToken cancellationToken);
     Task<bool> ResetPasswordAsync(ResetPasswordDTO dto, CancellationToken cancellationToken);
+    Task<List<UserReadDTO>?> GetAllUsersAsync(CancellationToken cancellationToken);
 }

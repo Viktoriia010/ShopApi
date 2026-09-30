@@ -10,6 +10,5 @@ namespace Shop.Application.DTOs.OrderDTOs;
 
 public class OrderCreateDTO
 {
-    public bool Paid { get; set; }  = false;
     public List<OrderItemDTO> Items { get; set; } = null!;
 }

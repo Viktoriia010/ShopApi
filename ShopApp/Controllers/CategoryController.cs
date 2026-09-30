@@ -1,19 +1,15 @@
 ﻿using FluentValidation;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Shop.Api.Exceptions;
 using Shop.Api.Interfaces;
 using Shop.Api.Requests.Categories;
-using Shop.Api.Services;
 using Shop.Application.Commands.Category;
 using Shop.Application.DTOs.CategoryDTOs;
 using Shop.Application.Interfaces.Services;
 using Shop.Application.Queries.Category;
-using Shop.Application.Validators.Category;
-using ShopDomain.Models;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
 namespace Shop.Api.Controllers;
 
 [ApiController]
@@ -42,7 +38,14 @@ public class CategoryController(ICategoryService _categoryService, IImageService
         if (!result.IsValid)
         {
 
-            return BadRequest(result.Errors);
+            var errors = result.Errors
+                .GroupBy(x => x.PropertyName)
+                .ToDictionary(
+                    x => x.Key,
+                    x => x.Select(e => e.ErrorMessage).ToArray()
+                );
+
+            throw new ValidationAppException(errors);
 
         }
 
@@ -74,11 +77,11 @@ public class CategoryController(ICategoryService _categoryService, IImageService
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetCategoryById([FromRoute] int id, CancellationToken cancellationToken)
     {
-        //var category = await _categoryService.GetCategoryByIdAsync(id, cancellationToken);
-        var category = await _mediator.Send(new GetCategoryByIdQuery(id), cancellationToken);
+        var category = await _categoryService.GetCategoryByIdAsync(id, cancellationToken);
+        //var category = await _mediator.Send(new GetCategoryByIdQuery(id), cancellationToken);
         if (category == null)
         {
-            return NotFound();
+            throw new NotFoundException("Category not found");
         }
         return Ok(category);
     }
@@ -90,7 +93,7 @@ public class CategoryController(ICategoryService _categoryService, IImageService
         var category = await _categoryService.GetCategoryByIdAsync(id, cancellationToken);
         if (category == null)
         {
-            return NotFound();
+            throw new NotFoundException("Category not found");
         }
         var res = await _categoryService.GetParentsCategoryByIdAsync(category, cancellationToken);
 
@@ -103,7 +106,7 @@ public class CategoryController(ICategoryService _categoryService, IImageService
         var category = await _categoryService.GetCategoryByIdAsync(id, cancellationToken);
         if (category == null)
         {
-            return NotFound();
+            throw new NotFoundException("Category not found");
         }
         var res = await _categoryService.GetChildrensCategoryByIdAsync(category.Id, cancellationToken);
 
@@ -124,7 +127,7 @@ public class CategoryController(ICategoryService _categoryService, IImageService
         var res = await _categoryService.DeleteCategoryAsync(id, cancellationToken);
         if (!res)
         {
-            return NotFound();
+            throw new NotFoundException("Category not found");
         }
         return NoContent(); 
     }
@@ -143,7 +146,7 @@ public class CategoryController(ICategoryService _categoryService, IImageService
         var res = await _categoryService.UpdateCategoryAsync(id, updateDTO, cancellationToken);
         if (res == null)
         {
-            return NotFound();
+            throw new NotFoundException("Category not found");
         }
         return Ok(res); 
     }
@@ -156,7 +159,7 @@ public class CategoryController(ICategoryService _categoryService, IImageService
         var dto = await _mediator.Send(new GetCategoryBySlugQuery(slug), cancellationToken) ;
 
         if (dto == null)
-            return NotFound();
+            throw new NotFoundException("Category not found");
 
         return Ok(dto);
     }

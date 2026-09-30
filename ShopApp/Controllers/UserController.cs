@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Shop.Application.Interfaces.Services;
 using ShopDomain.Models;
 
 namespace Shop.Api.Controllers;
@@ -11,4 +12,6 @@ public class UserController : ControllerBase
     {
         return Ok(user);
     }
+
+
 }

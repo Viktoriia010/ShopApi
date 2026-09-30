@@ -11,4 +11,5 @@ namespace Shop.Application.Interfaces.Services;
 public interface IAddressService
 {
     Task<AddressReadDTO> AddAddressAsync(string email, AddressCreateDTO address, CancellationToken cancellationToken);
+    Task<List<AddressReadDTO>?> GetAllAddressAsync(string email, CancellationToken cancellationToken);
 }

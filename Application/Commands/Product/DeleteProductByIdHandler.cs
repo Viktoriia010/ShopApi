@@ -2,6 +2,7 @@
 using MediatR;
 using Shop.Application.DTOs.ProductDTOs;
 using Shop.Application.Interfaces.Repository;
+using Shop.Application.Interfaces.Services;
 using Shop.Application.Queries.Product;
 using System;
 using System.Collections.Generic;
@@ -11,13 +12,14 @@ using System.Threading.Tasks;
 
 namespace Shop.Application.Commands.Product;
 
-public class DeleteProductByIdHandler(IMapper _mapper, IProductRepository _repository) : IRequestHandler<DeleteProductByIdCommand, ProductReadDTO?>
+public class DeleteProductByIdHandler(IMapper _mapper, IProductRepository _repository, ICachingService _cachingService) : IRequestHandler<DeleteProductByIdCommand, ProductReadDTO?>
 {
     public async Task<ProductReadDTO?> Handle(DeleteProductByIdCommand request, CancellationToken cancellationToken)
     {
         var entity = await _repository.DeleteProductByIdAsync(request.id, cancellationToken);
         if (entity == null)
             return null;
+        await _cachingService.RemoveAsync("Products");
         return _mapper.Map<ProductReadDTO?>(entity);
 
     }

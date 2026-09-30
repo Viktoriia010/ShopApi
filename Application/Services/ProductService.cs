@@ -46,6 +46,19 @@ public class ProductService(IProductRepository _repository, IMapper _mapper, ICa
         //return _mapper.Map<List<ProductReadDTO>>(products);
     }
 
+    public async Task<List<ProductReadDTO>?> GetActiveProductsAsync(CancellationToken cancellationToken)
+    {
+        var cache = await _cacheService.GetAsync<List<ProductReadDTO>>("Products:active");
+        if (cache == null)
+        {
+            var products = await _repository.GetActiveProductsAsync(cancellationToken);
+            cache = _mapper.Map<List<ProductReadDTO>>(products);
+            await _cacheService.SetAsync("Products:active", cache, null);
+
+        }
+        return cache;
+    }
+
 
     public async Task<ProductReadDTO?> GetProductByIdAsync(int id, CancellationToken cancellationToken)
     {
@@ -74,6 +87,37 @@ public class ProductService(IProductRepository _repository, IMapper _mapper, ICa
             return _mapper.Map<List<ProductReadDTO>>(res);
         }
         return null;
+    }
+    public async Task<List<ProductReadDTO>?> GetActiveProductsByCategoryAsync(int categoryId, CancellationToken cancellationToken)
+    {
+        var res = await _repository.GetActiveProductsByCategoryAsync(categoryId, cancellationToken);
+        if (res != null)
+        {
+            return _mapper.Map<List<ProductReadDTO>>(res);
+        }
+        return null;
+    }
+
+    public async Task<List<ProductReadDTO>?> GetRandomProductsAsync(CancellationToken cancellationToken)
+    {
+        var cache = await _cacheService.GetAsync<List<ProductReadDTO>>("Products:random");
+        if (cache == null)
+        {
+            var products = await GetActiveProductsAsync(cancellationToken);
+            if (products == null)
+            {
+                return null;
+            }
+            cache = products
+                .OrderBy(x => Random.Shared.Next())
+                .Take(10)
+                .ToList();
+            await _cacheService.SetAsync("Products:random", cache, null);
+
+        }
+        return cache;
+
+
     }
 
 

@@ -24,6 +24,10 @@ public class ProductRepository(ShopDbContext _context) : IProductRepository
     {
         return await _context.Products.Include(x => x.Images).ToListAsync(cancellationToken);
     }
+    public async Task<List<Product>?> GetActiveProductsAsync(CancellationToken cancellationToken)
+    {
+        return await _context.Products.Where(p=> p.IsActive).Include(x => x.Images).ToListAsync(cancellationToken);
+    }
 
     public async Task<Product>? GetProductByIdAsync(int id, CancellationToken cancellationToken)
     {
@@ -35,6 +39,13 @@ public class ProductRepository(ShopDbContext _context) : IProductRepository
     {
         return await _context.Products
         .Where(p => p.CategoryId == categoryId)
+        .Include(p => p.Images)
+        .ToListAsync(cancellationToken);
+    }
+    public async Task<List<Product>?> GetActiveProductsByCategoryAsync(int categoryId, CancellationToken cancellationToken)
+    {
+        return await _context.Products
+        .Where(p => p.CategoryId == categoryId && p.IsActive)
         .Include(p => p.Images)
         .ToListAsync(cancellationToken);
     }

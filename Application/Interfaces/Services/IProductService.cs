@@ -9,6 +9,9 @@ public interface IProductService
     Task<int> CreateProductAsync(ProductCreateDTO product, CancellationToken cancellationToken);
     Task<ProductReadDTO?> GetProductByIdAsync(int id, CancellationToken cancellationToken);
     Task<List<ProductReadDTO>?> GetProductsByCategoryAsync(int categoryId, CancellationToken cancellationToken);
+    Task<List<ProductReadDTO>?> GetActiveProductsByCategoryAsync(int categoryId, CancellationToken cancellationToken);
+    Task<List<ProductReadDTO>?> GetRandomProductsAsync(CancellationToken cancellationToken);
+    Task<List<ProductReadDTO>?> GetActiveProductsAsync(CancellationToken cancellationToken);
     //Product UpdateProductById(Product product, int id);
     //bool DeleteProductById(int id);
     //List<Product> SearchProductByName(string name);

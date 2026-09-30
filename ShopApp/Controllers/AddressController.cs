@@ -35,4 +35,19 @@ public class AddressController(IAddressService _addressService, IValidator<Addre
         var resp = await _addressService.AddAddressAsync(email, dto, cancellationToken);
         return Ok(resp);
     }
+    [HttpGet]
+    public async Task<IActionResult> GetAllAddress(CancellationToken cancellationToken)
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        if (email == null)
+        {
+            return BadRequest("Email не найдено");
+        }
+        var resp = await _addressService.GetAllAddressAsync(email, cancellationToken);
+        if (resp == null)
+        {
+            return NotFound();
+        }
+        return Ok(resp);
+    }
 }

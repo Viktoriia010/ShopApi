@@ -12,6 +12,7 @@ public interface IAuthRepository
     Task<User?> RegisterUserAsync(User user, string hash, CancellationToken cancellationToken);
     Task<bool> IsExistEmailAsync(string email, CancellationToken cancellationToken);
     Task<User?> GetUserByEmailAsync(string email, CancellationToken cancellationToken);
+    Task<List<User>?> GetAllUsersAsync(CancellationToken cancellationToken);
 
     Task AddUserAsync(User user, CancellationToken cancellationToken);
     Task UpdateUserAsync(User user, CancellationToken cancellationToken);

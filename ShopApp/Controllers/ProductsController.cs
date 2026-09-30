@@ -71,6 +71,12 @@ public class ProductsController(IProductService _productService, IImageService _
         var products = await _productService.GetAllProductsAsync(cancellationToken);
         return Ok(products);
     }
+    [HttpGet("active")]
+    public async Task<IActionResult> GetActiveProducts(CancellationToken cancellationToken)
+    {
+        var products = await _productService.GetActiveProductsAsync(cancellationToken);
+        return Ok(products);
+    }
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetProductById([FromRoute] int id, CancellationToken cancellationToken)
     {
@@ -87,6 +93,13 @@ public class ProductsController(IProductService _productService, IImageService _
     public async Task<IActionResult> GetProductsByCategory(int categoryId, CancellationToken cancellationToken)
     {
         var products = await _productService.GetProductsByCategoryAsync(categoryId, cancellationToken);
+        return Ok(products);
+    }
+
+    [HttpGet("category/{categoryId}/active")]
+    public async Task<IActionResult> GetActiveProductsByCategory(int categoryId, CancellationToken cancellationToken)
+    {
+        var products = await _productService.GetActiveProductsByCategoryAsync(categoryId, cancellationToken);
         return Ok(products);
     }
 
@@ -134,6 +147,18 @@ public class ProductsController(IProductService _productService, IImageService _
         return Ok(res);
 
     }
+
+    [HttpGet("random")]
+    public async Task<IActionResult> GetRandomProducts( CancellationToken cancellationToken)
+    {
+        var products = await _productService.GetRandomProductsAsync(cancellationToken);
+        if (products == null)
+        {
+            return NotFound();
+        }
+        return Ok(products);
+    }
+
     //[HttpGet("search")]
     //public IActionResult SearchProductByName([FromQuery] string title)
     //{

@@ -1,5 +1,6 @@
 ﻿using Shop.Application.Interfaces.Repository;
 using Shop.Application.Interfaces.Services;
+using Microsoft.EntityFrameworkCore;
 using Shop.Infrastructure.Data;
 using ShopDomain.Models;
 using System;
@@ -17,5 +18,11 @@ public class AddressRepository(ShopDbContext _context) : IAddressRepository
          await _context.Addresses.AddAsync(address, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
         return address;
+    }
+    public async Task<List<Address>?> GetAllAddressAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        return await _context.Addresses
+        .Where(a => a.UserId == userId)
+        .ToListAsync(cancellationToken);
     }
 }

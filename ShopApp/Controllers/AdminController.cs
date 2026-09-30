@@ -34,4 +34,11 @@ public class AdminController(IAdminService _adminService) : ControllerBase
 
         return Ok();
     }
+
+    [HttpGet("users")]
+    public async Task<IActionResult> GetAllUsers(CancellationToken cancellationToken)
+    {
+        var users = await _adminService.GetAllUsersAsync(cancellationToken);
+        return Ok(users);
+    }
 }
