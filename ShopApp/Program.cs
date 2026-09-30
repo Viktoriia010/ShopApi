@@ -195,10 +195,19 @@ public class Program
         builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         builder.Services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
 
+
+        builder.Services
+            .AddHttpClient<ICurrencyService, CurrencyService>(client =>
+            {
+                client.BaseAddress = new Uri("https://ТУТ-АДРЕСА-API/");
+            })
+            .AddPolicyHandler(PolicyHelper.GetRetryPolicy())
+            .AddPolicyHandler(PolicyHelper.GetCircuitBreakerPolicy());
+
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         //builder.Services.AddOpenApi();
-       // ================= AUTHENTICATION (JWT + COOKIES + GOOGLE) =================
-       builder.Services.AddAuthentication(options =>
+        // ================= AUTHENTICATION (JWT + COOKIES + GOOGLE) =================
+        builder.Services.AddAuthentication(options =>
        {
           // Для стандартних API-запитів використовуємо JWT
           options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
