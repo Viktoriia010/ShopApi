@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using RabbitMQ.Client;
+using Shop.Api.Exceptions;
 using Shop.Api.Interfaces;
 using Shop.Api.Middleware;
 using Shop.Api.Services;
@@ -79,7 +80,7 @@ public class Program
         {
             options.AddPolicy("AllowFrontend", policy =>
             {
-                policy.WithOrigins("http://localhost:5173") 
+                policy.WithOrigins("http://localhost:5174") 
                       .AllowAnyHeader()
                       .AllowAnyMethod()
                       .AllowCredentials(); 
@@ -110,6 +111,12 @@ public class Program
 
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
+
+        //==================== ProblemDetailsv ==============
+        
+        builder.Services.AddProblemDetails();
+        builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
 
         //======================VALIDATORS=================
         builder.Services.AddValidatorsFromAssemblyContaining<CategoryValidator>();
@@ -272,6 +279,9 @@ public class Program
         //app.UseAuthorization();
         app.UseAuthentication();
         app.UseAuthorization();
+
+        app.UseExceptionHandler();
+
         app.MapControllers();
         //app.UseRequestTimer();
 
